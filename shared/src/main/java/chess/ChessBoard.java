@@ -8,8 +8,18 @@ package chess;
  */
 public class ChessBoard {
 
+    public static char[][] initializeChessBoard(){
+        char[][] board = new char[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                board[i][j] = '|';
+            }
+        }
+        return board;
+    }
     public ChessBoard() {
-        
+        char[][] board = initializeChessBoard();
+
     }
 
     /**
@@ -19,7 +29,9 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        throw new RuntimeException("Not implemented");
+//        if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
+//
+//        }
     }
 
     /**
