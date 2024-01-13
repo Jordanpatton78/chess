@@ -66,19 +66,28 @@ public class ChessPiece {
     }
 
     public List<ChessPosition> bishopMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
-        int row = position.getRow();
-        int col = position.getColumn();
         // Front Right
-        int new_row = row;
-        int new_col = col;
+        endPositions = moveDiagonally(position, endPositions, board, 1, 1);
+        // Back Right
+        endPositions = moveDiagonally(position, endPositions, board, -1, 1);
+        // Back Left
+        endPositions = moveDiagonally(position, endPositions, board, -1, -1);
+        // Front Left
+        endPositions = moveDiagonally(position, endPositions, board, 1, -1);
+        return endPositions;
+    }
+
+    private List<ChessPosition> moveDiagonally(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board, int rowMoves, int colMoves){
+        int new_row = position.getRow();
+        int new_col = position.getColumn();
         ChessPosition currPos = position;
         while (true) {
             if (!isValidMove(new_row, new_col)){
                 break;
             }
             if (currPos == position){
-                new_row = new_row + 1;
-                new_col = new_col + 1;
+                new_row = new_row + rowMoves;
+                new_col = new_col + colMoves;
                 ChessPosition end = new ChessPosition(new_row, new_col);
                 currPos = end;
                 continue;
@@ -89,89 +98,8 @@ public class ChessPiece {
             ChessPosition end = new ChessPosition(new_row, new_col);
             endPositions.add(end);
             currPos = end;
-            new_row = new_row + 1;
-            new_col = new_col + 1;
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
-                break;
-            }
-        }
-        // Back Right
-        new_row = row;
-        new_col = col;
-        currPos = position;
-        while (true) {
-            if (!isValidMove(new_row, new_col)){
-                break;
-            }
-            if (currPos == position){
-                new_row = new_row - 1;
-                new_col = new_col + 1;
-                ChessPosition end = new ChessPosition(new_row, new_col);
-                currPos = end;
-                continue;
-            }
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
-                break;
-            }
-            ChessPosition end = new ChessPosition(new_row, new_col);
-            endPositions.add(end);
-            currPos = end;
-            new_row = new_row - 1;
-            new_col = new_col + 1;
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
-                break;
-            }
-        }
-        // Back Left
-        new_row = row;
-        new_col = col;
-        currPos = position;
-        while (true) {
-            if (!isValidMove(new_row, new_col)){
-                break;
-            }
-            if (currPos == position){
-                new_row = new_row - 1;
-                new_col = new_col - 1;
-                ChessPosition end = new ChessPosition(new_row, new_col);
-                currPos = end;
-                continue;
-            }
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
-                break;
-            }
-            ChessPosition end = new ChessPosition(new_row, new_col);
-            endPositions.add(end);
-            currPos = end;
-            new_row = new_row - 1;
-            new_col = new_col - 1;
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
-                break;
-            }
-        }
-        // Front Left
-        new_row = row;
-        new_col = col;
-        currPos = position;
-        while (true) {
-            if (!isValidMove(new_row, new_col)){
-                break;
-            }
-            if (currPos == position){
-                new_row = new_row + 1;
-                new_col = new_col - 1;
-                ChessPosition end = new ChessPosition(new_row, new_col);
-                currPos = end;
-                continue;
-            }
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
-                break;
-            }
-            ChessPosition end = new ChessPosition(new_row, new_col);
-            endPositions.add(end);
-            currPos = end;
-            new_row = new_row + 1;
-            new_col = new_col - 1;
+            new_row = new_row + rowMoves;
+            new_col = new_col + colMoves;
             if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
                 break;
             }
