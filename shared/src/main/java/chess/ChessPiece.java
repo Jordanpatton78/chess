@@ -57,7 +57,11 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         ChessPosition start = new ChessPosition(row, col);
         List<ChessPosition> endPositions = new ArrayList<>();
-        endPositions = bishopMoves(myPosition, endPositions, board);
+        if (this.pieceType == PieceType.BISHOP){
+            endPositions = bishopMoves(myPosition, endPositions, board);
+        } else if (this.pieceType == PieceType.KING) {
+            endPositions = kingMoves(myPosition, endPositions, board);
+        }
         for (ChessPosition endPosition : endPositions) {
             ChessMove move = new ChessMove(start, endPosition, this.getPieceType());
             moves.add(move);
@@ -67,41 +71,79 @@ public class ChessPiece {
 
     public List<ChessPosition> bishopMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
         // Front Right
-        endPositions = moveDiagonally(position, endPositions, board, 1, 1);
+        endPositions = move(position, endPositions, board, 1, 1, "endOfBoard");
         // Back Right
-        endPositions = moveDiagonally(position, endPositions, board, -1, 1);
+        endPositions = move(position, endPositions, board, -1, 1, "endOfBoard");
         // Back Left
-        endPositions = moveDiagonally(position, endPositions, board, -1, -1);
+        endPositions = move(position, endPositions, board, -1, -1, "endOfBoard");
         // Front Left
-        endPositions = moveDiagonally(position, endPositions, board, 1, -1);
+        endPositions = move(position, endPositions, board, 1, -1, "endOfBoard");
         return endPositions;
     }
 
-    private List<ChessPosition> moveDiagonally(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board, int rowMoves, int colMoves){
+    public List<ChessPosition> kingMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
+        // Front
+        endPositions = move(position, endPositions, board, 1, 0, "once");
+        // Front Right
+        endPositions = move(position, endPositions, board, 1, 1, "once");
+        // Right
+        endPositions = move(position, endPositions, board, 0, 1, "once");
+        // Back Right
+        endPositions = move(position, endPositions, board, -1, 1, "once");
+        // Back
+        endPositions = move(position, endPositions, board, -1, 0, "once");
+        // Back Left
+        endPositions = move(position, endPositions, board, -1, -1, "once");
+        // Left
+        endPositions = move(position, endPositions, board, 0, -1, "once");
+        // Front Left
+        endPositions = move(position, endPositions, board, 1, -1, "once");
+        return endPositions;
+    }
+
+    private List<ChessPosition> move(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board, int rowMoves, int colMoves, String moveType){
         int new_row = position.getRow();
         int new_col = position.getColumn();
         ChessPosition currPos = position;
-        while (true) {
+        if (moveType == "once"){
             if (!isValidMove(new_row, new_col)){
-                break;
+                return endPositions;
             }
-            if (currPos == position){
-                new_row = new_row + rowMoves;
-                new_col = new_col + colMoves;
-                ChessPosition end = new ChessPosition(new_row, new_col);
-                currPos = end;
-                continue;
-            }
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
-                break;
-            }
-            ChessPosition end = new ChessPosition(new_row, new_col);
-            endPositions.add(end);
-            currPos = end;
             new_row = new_row + rowMoves;
             new_col = new_col + colMoves;
-            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
-                break;
+            ChessPosition end = new ChessPosition(new_row, new_col);
+            currPos = end;
+            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
+                // Do nothing
+            } else if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor) {
+                endPositions.add(end);
+            } else {
+                endPositions.add(end);
+            }
+            return endPositions;
+        } else if (moveType == "endOfBoard") {
+            while (true) {
+                if (!isValidMove(new_row, new_col)){
+                    break;
+                }
+                if (currPos == position){
+                    new_row = new_row + rowMoves;
+                    new_col = new_col + colMoves;
+                    ChessPosition end = new ChessPosition(new_row, new_col);
+                    currPos = end;
+                    continue;
+                }
+                if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
+                    break;
+                }
+                ChessPosition end = new ChessPosition(new_row, new_col);
+                endPositions.add(end);
+                currPos = end;
+                new_row = new_row + rowMoves;
+                new_col = new_col + colMoves;
+                if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
+                    break;
+                }
             }
         }
         return endPositions;
