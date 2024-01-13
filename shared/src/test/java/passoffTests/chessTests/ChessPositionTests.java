@@ -2,6 +2,8 @@ package passoffTests.chessTests;
 
 import chess.*;
 import org.junit.jupiter.api.*;
+import passoffTests.TestFactory;
+
 
 import java.util.HashSet;
 import java.util.Set;

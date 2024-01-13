@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 
 import static passoffTests.TestFactory.*;
+import passoffTests.TestFactory;
 
 public class PawnMoveTests {
 
