@@ -34,7 +34,7 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return this.teamColor;
     }
 
     /**
@@ -106,11 +106,11 @@ public class ChessPiece {
         int new_col = position.getColumn();
         ChessPosition currPos = position;
         if (moveType == "once"){
+            new_row = new_row + rowMoves;
+            new_col = new_col + colMoves;
             if (!isValidMove(new_row, new_col)){
                 return endPositions;
             }
-            new_row = new_row + rowMoves;
-            new_col = new_col + colMoves;
             ChessPosition end = new ChessPosition(new_row, new_col);
             currPos = end;
             if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
@@ -123,9 +123,6 @@ public class ChessPiece {
             return endPositions;
         } else if (moveType == "endOfBoard") {
             while (true) {
-                if (!isValidMove(new_row, new_col)){
-                    break;
-                }
                 if (currPos == position){
                     new_row = new_row + rowMoves;
                     new_col = new_col + colMoves;
@@ -141,6 +138,9 @@ public class ChessPiece {
                 currPos = end;
                 new_row = new_row + rowMoves;
                 new_col = new_col + colMoves;
+                if (!isValidMove(new_row, new_col)){
+                    break;
+                }
                 if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
                     break;
                 }
