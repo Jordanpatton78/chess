@@ -61,6 +61,14 @@ public class ChessPiece {
             endPositions = bishopMoves(myPosition, endPositions, board);
         } else if (this.pieceType == PieceType.KING) {
             endPositions = kingMoves(myPosition, endPositions, board);
+        } else if (this.pieceType == PieceType.QUEEN) {
+            endPositions = queenMoves(myPosition, endPositions, board);
+        } else if (this.pieceType == PieceType.ROOK) {
+            endPositions = rookMoves(myPosition, endPositions, board);
+        } else if (this.pieceType == PieceType.KNIGHT) {
+            endPositions = knightMoves(myPosition, endPositions, board);
+        } else if (this.pieceType == PieceType.PAWN) {
+            endPositions = pawnMoves(myPosition, endPositions, board);
         }
         for (ChessPosition endPosition : endPositions) {
             ChessMove move = new ChessMove(start, endPosition, this.getPieceType());
@@ -98,6 +106,110 @@ public class ChessPiece {
         endPositions = move(position, endPositions, board, 0, -1, "once");
         // Front Left
         endPositions = move(position, endPositions, board, 1, -1, "once");
+        return endPositions;
+    }
+
+    public List<ChessPosition> queenMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
+        // Front
+        endPositions = move(position, endPositions, board, 1, 0, "endOfBoard");
+        // Front Right
+        endPositions = move(position, endPositions, board, 1, 1, "endOfBoard");
+        // Right
+        endPositions = move(position, endPositions, board, 0, 1, "endOfBoard");
+        // Back Right
+        endPositions = move(position, endPositions, board, -1, 1, "endOfBoard");
+        // Back
+        endPositions = move(position, endPositions, board, -1, 0, "endOfBoard");
+        // Back Left
+        endPositions = move(position, endPositions, board, -1, -1, "endOfBoard");
+        // Left
+        endPositions = move(position, endPositions, board, 0, -1, "endOfBoard");
+        // Front Left
+        endPositions = move(position, endPositions, board, 1, -1, "endOfBoard");
+        return endPositions;
+    }
+
+    public List<ChessPosition> rookMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
+        // Front
+        endPositions = move(position, endPositions, board, 1, 0, "endOfBoard");
+        // Right
+        endPositions = move(position, endPositions, board, 0, 1, "endOfBoard");
+        // Back
+        endPositions = move(position, endPositions, board, -1, 0, "endOfBoard");
+        // Left
+        endPositions = move(position, endPositions, board, 0, -1, "endOfBoard");
+        return endPositions;
+    }
+
+    public List<ChessPosition> knightMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
+        // Front Right then up
+        endPositions = move(position, endPositions, board, 2, 1, "once");
+        // Front Right then right
+        endPositions = move(position, endPositions, board, 1, 2, "once");
+        // Back Right then right
+        endPositions = move(position, endPositions, board, -1, 2, "once");
+        // Back Right then down
+        endPositions = move(position, endPositions, board, -2, 1, "once");
+        // Back Left then down
+        endPositions = move(position, endPositions, board, -2, -1, "once");
+        // Back Left then left
+        endPositions = move(position, endPositions, board, -1, -2, "once");
+        // Front Left then left
+        endPositions = move(position, endPositions, board, 1, -2, "once");
+        // Front Left then up
+        endPositions = move(position, endPositions, board, 2, -1, "once");
+        return endPositions;
+    }
+
+    public List<ChessPosition> pawnMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
+        int row = position.getRow();
+        int col = position.getColumn();
+        ChessPosition front_right = new ChessPosition(row+1, col+1);
+        ChessPosition front_left = new ChessPosition(row+1, col-1);
+        ChessPosition back_right = new ChessPosition(row-1, col+1);
+        ChessPosition back_left = new ChessPosition(row-1, col-1);
+        if (position.getRow() == 2 && this.teamColor == ChessGame.TeamColor.WHITE){
+            // White initial
+            endPositions = move(position, endPositions, board, 1, 0, "once");
+            endPositions = move(position, endPositions, board, 2, 0, "once");
+        }
+        if (position.getRow() == 7 && this.teamColor == ChessGame.TeamColor.BLACK){
+            // Black initial
+            endPositions = move(position, endPositions, board, -1, 0, "once");
+            endPositions = move(position, endPositions, board, -2, 0, "once");
+        }
+        if (position.getRow() == 7 && this.teamColor == ChessGame.TeamColor.WHITE){
+            // White Promotion
+            endPositions = move(position, endPositions, board, 1, 0, "once");
+        }
+        if (position.getRow() == 2 && this.teamColor == ChessGame.TeamColor.BLACK){
+            // Black Promotion
+            endPositions = move(position, endPositions, board, -1, 0, "once");
+        }
+        if (board.getPiece(front_right)!= null && this.teamColor == ChessGame.TeamColor.WHITE){
+            // Capture right white
+            endPositions = move(position, endPositions, board, 1, 1, "once");
+        }
+        if (board.getPiece(front_left)!= null && this.teamColor == ChessGame.TeamColor.WHITE){
+            // Capture left white
+            endPositions = move(position, endPositions, board, 1, -1, "once");
+        }
+        if (board.getPiece(back_right)!= null && this.teamColor == ChessGame.TeamColor.BLACK){
+            // Capture right black
+            endPositions = move(position, endPositions, board, -1, 1, "once");
+        }
+        if (board.getPiece(back_left)!= null && this.teamColor == ChessGame.TeamColor.BLACK){
+            // Capture left black
+            endPositions = move(position, endPositions, board, -1, -1, "once");
+        }
+        // White Forward
+        if ((position.getRow() != 2 && position.getRow() != 7) && this.teamColor == ChessGame.TeamColor.WHITE){
+            endPositions = move(position, endPositions, board, 1, 0, "once");
+        }
+        if ((position.getRow() != 7 && position.getRow() != 2) && this.teamColor == ChessGame.TeamColor.BLACK){
+            // Black Forward
+            endPositions = move(position, endPositions, board, -1, 0, "once");
+        }
         return endPositions;
     }
 
