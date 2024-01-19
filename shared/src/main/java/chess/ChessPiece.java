@@ -164,27 +164,33 @@ public class ChessPiece {
     public List<ChessPosition> pawnMoves(ChessPosition position, List<ChessPosition> endPositions, ChessBoard board) {
         int row = position.getRow();
         int col = position.getColumn();
+        ChessPosition front_middle = new ChessPosition(row+1, col);
+        ChessPosition back_middle = new ChessPosition(row-1, col);
         ChessPosition front_right = new ChessPosition(row+1, col+1);
         ChessPosition front_left = new ChessPosition(row+1, col-1);
         ChessPosition back_right = new ChessPosition(row-1, col+1);
         ChessPosition back_left = new ChessPosition(row-1, col-1);
         if (position.getRow() == 2 && this.teamColor == ChessGame.TeamColor.WHITE){
             // White initial
-            endPositions = move(position, endPositions, board, 1, 0, "once");
-            endPositions = move(position, endPositions, board, 2, 0, "once");
+            if (board.getPiece(front_middle) == null) {
+                endPositions = move(position, endPositions, board, 1, 0, "pawn");
+                endPositions = move(position, endPositions, board, 2, 0, "pawn");
+            }
         }
         if (position.getRow() == 7 && this.teamColor == ChessGame.TeamColor.BLACK){
             // Black initial
-            endPositions = move(position, endPositions, board, -1, 0, "once");
-            endPositions = move(position, endPositions, board, -2, 0, "once");
+            if (board.getPiece(back_middle) == null) {
+                endPositions = move(position, endPositions, board, -1, 0, "pawn");
+                endPositions = move(position, endPositions, board, -2, 0, "pawn");
+            }
         }
         if (position.getRow() == 7 && this.teamColor == ChessGame.TeamColor.WHITE){
             // White Promotion
-            endPositions = move(position, endPositions, board, 1, 0, "once");
+            endPositions = move(position, endPositions, board, 1, 0, "pawn");
         }
         if (position.getRow() == 2 && this.teamColor == ChessGame.TeamColor.BLACK){
             // Black Promotion
-            endPositions = move(position, endPositions, board, -1, 0, "once");
+            endPositions = move(position, endPositions, board, -1, 0, "pawn");
         }
         if (board.getPiece(front_right)!= null && this.teamColor == ChessGame.TeamColor.WHITE){
             // Capture right white
@@ -204,11 +210,11 @@ public class ChessPiece {
         }
         // White Forward
         if ((position.getRow() != 2 && position.getRow() != 7) && this.teamColor == ChessGame.TeamColor.WHITE){
-            endPositions = move(position, endPositions, board, 1, 0, "once");
+            endPositions = move(position, endPositions, board, 1, 0, "pawn");
         }
         if ((position.getRow() != 7 && position.getRow() != 2) && this.teamColor == ChessGame.TeamColor.BLACK){
             // Black Forward
-            endPositions = move(position, endPositions, board, -1, 0, "once");
+            endPositions = move(position, endPositions, board, -1, 0, "pawn");
         }
         return endPositions;
     }
@@ -235,6 +241,9 @@ public class ChessPiece {
             return endPositions;
         } else if (moveType == "endOfBoard") {
             while (true) {
+                if (!isValidMove(new_row, new_col)){
+                    break;
+                }
                 if (currPos == position){
                     new_row = new_row + rowMoves;
                     new_col = new_col + colMoves;
@@ -242,25 +251,50 @@ public class ChessPiece {
                     currPos = end;
                     continue;
                 }
+                ChessPosition end = new ChessPosition(new_row, new_col);
+                currPos = end;
                 if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
                     break;
                 }
-                ChessPosition end = new ChessPosition(new_row, new_col);
                 endPositions.add(end);
-                currPos = end;
                 new_row = new_row + rowMoves;
                 new_col = new_col + colMoves;
-                if (!isValidMove(new_row, new_col)){
-                    break;
-                }
                 if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor){
                     break;
                 }
             }
+        } else if (moveType == "pawn"){
+            new_row = new_row + rowMoves;
+            new_col = new_col + colMoves;
+            if (!isValidMove(new_row, new_col)){
+                return endPositions;
+            }
+            ChessPosition end = new ChessPosition(new_row, new_col);
+            currPos = end;
+            if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor == this.teamColor){
+                // Do nothing
+            } else if (board.getPiece(currPos)!=null && board.getPiece(currPos).teamColor != this.teamColor) {
+                // Also do nothing for the pawns.
+            } else {
+                endPositions.add(end);
+            }
+            return endPositions;
         }
         return endPositions;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessPiece that = (ChessPiece) o;
+        return pieceType == that.pieceType && teamColor == that.teamColor;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(pieceType, teamColor);
+    }
     private boolean isValidMove(int row, int col) {
         return row >= 1 && row <= 8 && col >= 1 && col <= 8;
     }

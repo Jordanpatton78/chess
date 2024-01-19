@@ -1,5 +1,9 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -38,6 +42,57 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        throw new RuntimeException("Not implemented");
+        Map<Integer, ChessPiece.PieceType> pieceTypeMap = getPieceType();
+        // White Non-pawns
+        for (int col=1; col<=8; col++){
+            ChessPosition position = new ChessPosition(1, col);
+            ChessPiece.PieceType pieceType = pieceTypeMap.get(col);
+            ChessPiece piece = new ChessPiece(ChessGame.TeamColor.WHITE, pieceType);
+            addPiece(position, piece);
+        }
+        // White Pawns
+        for (int col=1; col<=8; col++){
+            ChessPosition position = new ChessPosition(2, col);
+            ChessPiece piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+            addPiece(position, piece);
+        }
+        // Black Pawns
+        for (int col=1; col<=8; col++){
+            ChessPosition position = new ChessPosition(7, col);
+            ChessPiece piece = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+            addPiece(position, piece);
+        }
+        // Black Non-Pawns
+        for (int col=1; col<=8; col++){
+            ChessPosition position = new ChessPosition(8, col);
+            ChessPiece.PieceType pieceType = pieceTypeMap.get(col);
+            ChessPiece piece = new ChessPiece(ChessGame.TeamColor.BLACK, pieceType);
+            addPiece(position, piece);
+        }
+    }
+
+    public Map<Integer, ChessPiece.PieceType> getPieceType(){
+        Map<Integer, ChessPiece.PieceType> map = new HashMap<Integer, ChessPiece.PieceType>();
+        map.put(1, ChessPiece.PieceType.ROOK);
+        map.put(2, ChessPiece.PieceType.KNIGHT);
+        map.put(3, ChessPiece.PieceType.BISHOP);
+        map.put(4, ChessPiece.PieceType.QUEEN);
+        map.put(5, ChessPiece.PieceType.KING);
+        map.put(6, ChessPiece.PieceType.BISHOP);
+        map.put(7, ChessPiece.PieceType.KNIGHT);
+        map.put(8, ChessPiece.PieceType.ROOK);
+        return map;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that = (ChessBoard) o;
+        return Arrays.deepEquals(squares, that.squares);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(squares);
     }
 }
