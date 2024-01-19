@@ -12,6 +12,7 @@ public class ChessPiece {
 
     private PieceType pieceType;
     private ChessGame.TeamColor teamColor;
+    private boolean toBePromoted = false;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceType = type;
@@ -71,9 +72,28 @@ public class ChessPiece {
             endPositions = pawnMoves(myPosition, endPositions, board);
         }
         for (ChessPosition endPosition : endPositions) {
-            ChessMove move = new ChessMove(start, endPosition, this.getPieceType());
-            moves.add(move);
+            if (toBePromoted) {
+                for (int i=0;i<4;i++){
+                    if (i==0) {
+                        ChessMove new_move = new ChessMove(start, endPosition, PieceType.QUEEN);
+                        moves.add((new_move));
+                    } else if (i==1) {
+                        ChessMove new_move = new ChessMove(start, endPosition, PieceType.ROOK);
+                        moves.add((new_move));
+                    } else if (i==2) {
+                        ChessMove new_move = new ChessMove(start, endPosition, PieceType.KNIGHT);
+                        moves.add((new_move));
+                    } else if (i==3) {
+                        ChessMove new_move = new ChessMove(start, endPosition, PieceType.BISHOP);
+                        moves.add((new_move));
+                    }
+                }
+            } else {
+                ChessMove move = new ChessMove(start, endPosition, null);
+                moves.add(move);
+            }
         }
+        toBePromoted = false;
         return moves;
     }
 
@@ -187,10 +207,12 @@ public class ChessPiece {
         if (position.getRow() == 7 && this.teamColor == ChessGame.TeamColor.WHITE){
             // White Promotion
             endPositions = move(position, endPositions, board, 1, 0, "pawn");
+            toBePromoted = true;
         }
         if (position.getRow() == 2 && this.teamColor == ChessGame.TeamColor.BLACK){
             // Black Promotion
             endPositions = move(position, endPositions, board, -1, 0, "pawn");
+            toBePromoted = true;
         }
         if (board.getPiece(front_right)!= null && this.teamColor == ChessGame.TeamColor.WHITE){
             // Capture right white
