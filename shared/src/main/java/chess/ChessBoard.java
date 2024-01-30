@@ -34,7 +34,14 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+        if (position.getRow() < 1 || position.getColumn() < 1){
+            return null;
+        }
         return squares[position.getRow()-1][position.getColumn()-1];
+    }
+
+    public void removePiece(ChessPosition position){
+        squares[position.getRow()-1][position.getColumn()-1] = null;
     }
 
     /**
