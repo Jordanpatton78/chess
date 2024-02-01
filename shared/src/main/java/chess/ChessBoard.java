@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -12,6 +13,7 @@ import java.util.Map;
  */
 public class ChessBoard {
     ChessPiece[][] squares = new ChessPiece[8][8];
+    HashMap<ChessPosition, ChessPiece> pieces = new HashMap<ChessPosition, ChessPiece>();
     public ChessBoard() {
 
     }
@@ -24,6 +26,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow()-1][position.getColumn()-1] = piece;
+        pieces.put(position, piece);
     }
 
     /**
@@ -42,6 +45,7 @@ public class ChessBoard {
 
     public void removePiece(ChessPosition position){
         squares[position.getRow()-1][position.getColumn()-1] = null;
+        pieces.remove(position);
     }
 
     /**
@@ -49,7 +53,7 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        Map<Integer, ChessPiece.PieceType> pieceTypeMap = getPieceType();
+        Map<Integer, ChessPiece.PieceType> pieceTypeMap = getPieceFromMap();
         // White Non-pawns
         for (int col=1; col<=8; col++){
             ChessPosition position = new ChessPosition(1, col);
@@ -78,7 +82,7 @@ public class ChessBoard {
         }
     }
 
-    public Map<Integer, ChessPiece.PieceType> getPieceType(){
+    public Map<Integer, ChessPiece.PieceType> getPieceFromMap(){
         Map<Integer, ChessPiece.PieceType> map = new HashMap<Integer, ChessPiece.PieceType>();
         map.put(1, ChessPiece.PieceType.ROOK);
         map.put(2, ChessPiece.PieceType.KNIGHT);

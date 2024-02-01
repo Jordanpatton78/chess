@@ -1,8 +1,7 @@
 package chess;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
+import java.lang.reflect.Array;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -93,7 +92,28 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Find King Position
+        ChessPosition king_position = null;
+        for (ChessPosition key : board.pieces.keySet()){
+            ChessPiece piece = board.pieces.get(key);
+            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor){
+                king_position = key;
+            }
+        }
+        // Find pieces that will reach King's position
+        for (ChessPosition key : board.pieces.keySet()){
+            ChessPiece piece = board.pieces.get(key);
+            if (piece.getTeamColor() != teamColor){
+                HashSet<ChessMove> moves = piece.pieceMoves(board, key);
+                for (ChessMove move : moves){
+                    ChessPosition endPosition = move.getEndPosition();
+                    if (endPosition.equals(king_position)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -117,7 +137,7 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
-    /**
+   /**
      * Sets this game's chessboard with a given board
      *
      * @param board the new board to use
