@@ -2,20 +2,21 @@ package chess;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
  * Note: You can add to this class, but you may not alter
- * signature of the existing methods.
+ * the signature of the existing methods.
  */
 public class ChessBoard {
-    ChessPiece[][] squares = new ChessPiece[8][8];
-    HashMap<ChessPosition, ChessPiece> pieces = new HashMap<ChessPosition, ChessPiece>();
-    public ChessBoard() {
 
+    private ChessPiece[][] squares = new ChessPiece[8][8];
+    public HashMap<ChessPosition, ChessPiece> pieces = new HashMap<>();
+
+    public ChessBoard() {
+        // Empty constructor
     }
 
     /**
@@ -25,7 +26,7 @@ public class ChessBoard {
      * @param piece    the piece to add
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        squares[position.getRow()-1][position.getColumn()-1] = piece;
+        squares[position.getRow() - 1][position.getColumn() - 1] = piece;
         pieces.put(position, piece);
     }
 
@@ -37,14 +38,14 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        if (position.getRow() < 1 || position.getColumn() < 1 || position.getRow() > 8 || position.getColumn() > 8){
+        if (position.getRow() < 1 || position.getColumn() < 1 || position.getRow() > 8 || position.getColumn() > 8) {
             return null;
         }
-        return squares[position.getRow()-1][position.getColumn()-1];
+        return squares[position.getRow() - 1][position.getColumn() - 1];
     }
 
-    public void removePiece(ChessPosition position){
-        squares[position.getRow()-1][position.getColumn()-1] = null;
+    public void removePiece(ChessPosition position) {
+        squares[position.getRow() - 1][position.getColumn() - 1] = null;
         pieces.remove(position);
     }
 
@@ -54,27 +55,31 @@ public class ChessBoard {
      */
     public void resetBoard() {
         Map<Integer, ChessPiece.PieceType> pieceTypeMap = getPieceFromMap();
+
         // White Non-pawns
-        for (int col=1; col<=8; col++){
+        for (int col = 1; col <= 8; col++) {
             ChessPosition position = new ChessPosition(1, col);
             ChessPiece.PieceType pieceType = pieceTypeMap.get(col);
             ChessPiece piece = new ChessPiece(ChessGame.TeamColor.WHITE, pieceType);
             addPiece(position, piece);
         }
+
         // White Pawns
-        for (int col=1; col<=8; col++){
+        for (int col = 1; col <= 8; col++) {
             ChessPosition position = new ChessPosition(2, col);
             ChessPiece piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
             addPiece(position, piece);
         }
+
         // Black Pawns
-        for (int col=1; col<=8; col++){
+        for (int col = 1; col <= 8; col++) {
             ChessPosition position = new ChessPosition(7, col);
             ChessPiece piece = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
             addPiece(position, piece);
         }
+
         // Black Non-Pawns
-        for (int col=1; col<=8; col++){
+        for (int col = 1; col <= 8; col++) {
             ChessPosition position = new ChessPosition(8, col);
             ChessPiece.PieceType pieceType = pieceTypeMap.get(col);
             ChessPiece piece = new ChessPiece(ChessGame.TeamColor.BLACK, pieceType);
@@ -82,8 +87,8 @@ public class ChessBoard {
         }
     }
 
-    public Map<Integer, ChessPiece.PieceType> getPieceFromMap(){
-        Map<Integer, ChessPiece.PieceType> map = new HashMap<Integer, ChessPiece.PieceType>();
+    public Map<Integer, ChessPiece.PieceType> getPieceFromMap() {
+        Map<Integer, ChessPiece.PieceType> map = new HashMap<>();
         map.put(1, ChessPiece.PieceType.ROOK);
         map.put(2, ChessPiece.PieceType.KNIGHT);
         map.put(3, ChessPiece.PieceType.BISHOP);
@@ -94,6 +99,7 @@ public class ChessBoard {
         map.put(8, ChessPiece.PieceType.ROOK);
         return map;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
