@@ -105,6 +105,11 @@ public class ChessGame {
                 ChessPiece piece = this.board.getPiece(start);
                 this.board.addPiece(end, piece);
                 this.board.removePiece(start);
+                if (move.promotionPiece != null){
+                    ChessPiece promotedPiece = new ChessPiece(piece.getTeamColor(), move.promotionPiece);
+                    this.board.removePiece(end);
+                    this.board.addPiece(end, promotedPiece);
+                }
             } else {
                 throw new InvalidMoveException("Invalid move: " + move);
             }
