@@ -11,7 +11,7 @@ import java.util.*;
  */
 public class ChessGame {
 
-    TeamColor teamTurn;
+    TeamColor teamTurn = TeamColor.WHITE;
     ChessBoard board;
     public ChessGame() {
 
@@ -53,9 +53,6 @@ public class ChessGame {
         TeamColor teamColor = piece.getTeamColor();
         HashSet<ChessMove> moves = piece.pieceMoves(this.board, startPosition);
         HashSet<ChessMove> new_moves = simulate_moves(moves, teamColor);
-        if (this.board.getPiece(startPosition) == null){
-            return null;
-        }
         return new_moves;
     }
 
@@ -102,6 +99,9 @@ public class ChessGame {
                     this.board.removePiece(end);
                 }
                 ChessPiece piece = this.board.getPiece(start);
+                if (piece.getTeamColor() != teamTurn){
+                    throw new InvalidMoveException("Wrong team's turn.");
+                }
                 this.board.addPiece(end, piece);
                 this.board.removePiece(start);
                 if (move.promotionPiece != null){
@@ -109,11 +109,17 @@ public class ChessGame {
                     this.board.removePiece(end);
                     this.board.addPiece(end, promotedPiece);
                 }
+                if (teamTurn == TeamColor.WHITE){
+                    teamTurn = TeamColor.BLACK;
+                } else {
+                    teamTurn = TeamColor.WHITE;
+                }
             } else {
                 throw new InvalidMoveException("Invalid move: " + move);
             }
         } catch (InvalidMoveException e){
             System.out.println(e.getMessage());
+            throw e;
         }
     }
 
