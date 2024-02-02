@@ -52,8 +52,7 @@ public class ChessGame {
         ChessPiece piece = this.board.getPiece(startPosition);
         TeamColor teamColor = piece.getTeamColor();
         HashSet<ChessMove> moves = piece.pieceMoves(this.board, startPosition);
-        HashSet<ChessMove> new_moves = new HashSet<ChessMove>();
-        new_moves = simulate_moves(moves, teamColor);
+        HashSet<ChessMove> new_moves = simulate_moves(moves, teamColor);
         if (this.board.getPiece(startPosition) == null){
             return null;
         }
