@@ -50,14 +50,41 @@ public class ChessGame {
      */
     public HashSet<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = this.board.getPiece(startPosition);
-        HashSet<ChessMove> moves = null;
-        if (!isInCheck(piece.getTeamColor())){
-            moves = piece.pieceMoves(this.board, startPosition);
-        }
+        TeamColor teamColor = piece.getTeamColor();
+        HashSet<ChessMove> moves = piece.pieceMoves(this.board, startPosition);
+        HashSet<ChessMove> new_moves = new HashSet<ChessMove>();
+        new_moves = simulate_moves(moves, teamColor);
         if (this.board.getPiece(startPosition) == null){
             return null;
         }
-        return moves;
+        return new_moves;
+    }
+
+    public HashSet<ChessMove> simulate_moves(HashSet<ChessMove> moves, TeamColor teamColor){
+        HashSet<ChessMove> new_moves = new HashSet<ChessMove>();
+        for (ChessMove move : moves){
+            // Make simulated move
+            ChessPosition start = move.getStartPosition();
+            ChessPosition end = move.getEndPosition();
+            ChessPiece piece_to_remove = null;
+            if (board.getPiece(end) != null){
+                piece_to_remove = this.board.getPiece(end);
+                this.board.removePiece(end);
+            }
+            ChessPiece this_piece = this.board.getPiece(start);
+            this.board.addPiece(end, this_piece);
+            this.board.removePiece(start);
+            if (!isInCheck(teamColor)){
+                new_moves.add(move);
+            }
+            // Undo simulated move
+            this.board.removePiece(end);
+            this.board.addPiece(start, this_piece);
+            if (piece_to_remove != null){
+                this.board.addPiece(end, piece_to_remove);
+            }
+        }
+        return new_moves;
     }
 
     /**
@@ -124,70 +151,7 @@ public class ChessGame {
         ChessPosition king_position = getKingPosition(board, teamColor);
         ChessPiece king = board.pieces.get(king_position);
         HashSet<ChessMove> king_moves = king.pieceMoves(board, king_position);
-        HashSet<ChessMove> new_king_moves = new HashSet<ChessMove>();
-        ArrayList<ChessPosition> king_adj_pos = new ArrayList<ChessPosition>();
-        for (ChessMove move : king_moves){
-            ChessPosition endPos = move.getEndPosition();
-            king_adj_pos.add(endPos);
-        }
-        // Check specifically for Black pawns
-        if (teamColor == TeamColor.WHITE){
-            for (ChessMove move : king_moves){
-                ChessPosition pos = move.getEndPosition();
-                ChessPosition pawn_pos1 = new ChessPosition(pos.getRow()+1, pos.getColumn()-1);
-                ChessPosition pawn_pos2 = new ChessPosition(pos.getRow()+1, pos.getColumn()+1);
-                ChessPiece piece = board.pieces.get(pawn_pos1);
-                if (board.getPiece(pawn_pos1) != null){
-                    if (piece.getPieceType() != ChessPiece.PieceType.PAWN && piece.getTeamColor() != TeamColor.BLACK){
-                        ChessMove king_move_to_add = new ChessMove(king_position, pos, null);
-                        new_king_moves.add(king_move_to_add);
-                    }
-                }
-                piece = board.pieces.get(pawn_pos2);
-                if (board.getPiece(pawn_pos2) != null){
-                    if (piece.getPieceType() != ChessPiece.PieceType.PAWN && piece.getTeamColor() != TeamColor.BLACK){
-                        ChessMove king_move_to_add = new ChessMove(king_position, pos, null);
-                        new_king_moves.add(king_move_to_add);
-                    }
-                }
-            }
-        }
-        // Check for white pawns
-        if (teamColor == TeamColor.BLACK){
-            for (ChessMove move : king_moves){
-                ChessPosition pos = move.getEndPosition();
-                ChessPosition pawn_pos1 = new ChessPosition(pos.getRow()-1, pos.getColumn()-1);
-                ChessPosition pawn_pos2 = new ChessPosition(pos.getRow()-1, pos.getColumn()+1);
-                ChessPiece piece = board.pieces.get(pawn_pos1);
-                if (board.getPiece(pawn_pos1) != null){
-                    if (piece.getPieceType() != ChessPiece.PieceType.PAWN && piece.getTeamColor() != TeamColor.WHITE){
-                        ChessMove king_move_to_add = new ChessMove(king_position, pos, null);
-                        new_king_moves.add(king_move_to_add);
-                    }
-                }
-                piece = board.pieces.get(pawn_pos2);
-                if (board.getPiece(pawn_pos2) != null){
-                    if (piece.getPieceType() != ChessPiece.PieceType.PAWN && piece.getTeamColor() != TeamColor.WHITE){
-                        ChessMove king_move_to_add = new ChessMove(king_position, pos, null);
-                        new_king_moves.add(king_move_to_add);
-                    }
-                }
-            }
-        }
-        // Find pieces that can move to pieces adjacent to the king
-        for (ChessPosition key : board.pieces.keySet()){
-            ChessPiece piece = board.pieces.get(key);
-            if (piece.getTeamColor() != teamColor){
-                HashSet<ChessMove> moves = piece.pieceMoves(board, key);
-                for (ChessMove move : moves){
-                    ChessPosition endPosition = move.getEndPosition();
-                    if (king_adj_pos.contains(endPosition)){
-                        ChessMove king_move_to_remove = new ChessMove(king_position, endPosition, null);
-                        new_king_moves.remove(king_move_to_remove);
-                    }
-                }
-            }
-        }
+        HashSet<ChessMove> new_king_moves = simulate_moves(king_moves, teamColor);
         return (isInCheck(teamColor) && new_king_moves.isEmpty());
     }
 
@@ -199,7 +163,12 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        // Find king info
+        ChessPosition king_position = getKingPosition(board, teamColor);
+        ChessPiece king = board.pieces.get(king_position);
+        HashSet<ChessMove> king_moves = king.pieceMoves(board, king_position);
+        HashSet<ChessMove> new_king_moves = simulate_moves(king_moves, teamColor);
+        return (!isInCheck(teamColor) && new_king_moves.isEmpty());
     }
 
     public ChessPosition getKingPosition(ChessBoard board, TeamColor teamColor){
