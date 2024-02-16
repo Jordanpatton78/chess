@@ -1,8 +1,9 @@
 package service;
 
 import dataAccess.DataAccess;
-import model.User;
 import dataAccess.DataAccessException;
+import model.AuthData;
+import model.UserData;
 
 import java.util.Collection;
 
@@ -14,8 +15,16 @@ public class Service {
         this.dataAccess = dataAccess;
     }
 
-    public User addUser(User user) throws DataAccessException {
+    public UserData addUser(UserData user) throws DataAccessException {
         return dataAccess.addUser(user);
+    }
+
+    public UserData getUser(UserData user) throws DataAccessException {
+        return dataAccess.getUser(user);
+    }
+
+    public AuthData createAuth(UserData user, AuthData authData) throws DataAccessException {
+        return dataAccess.createAuth(user, authData);
     }
 
     public void deleteAll() throws DataAccessException {

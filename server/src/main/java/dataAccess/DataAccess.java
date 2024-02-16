@@ -1,12 +1,27 @@
 package dataAccess;
 
 import dataAccess.DataAccessException;
-import model.User;
+import model.AuthData;
+import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.Collection;
 
-public interface DataAccess {
-    User addUser(User user) throws DataAccessException;
+public class DataAccess {
+    public UserData addUser(UserData user) throws DataAccessException{
+        return user;
+    }
 
-    void deleteAll() throws DataAccessException;
+    public UserData getUser(UserData user) throws DataAccessException{
+        return user;
+    }
+
+    public AuthData createAuth(UserData user, AuthData authData) throws DataAccessException {
+        return authData;
+    }
+
+
+    public void deleteAll() throws DataAccessException{
+        ;
+    }
 }
