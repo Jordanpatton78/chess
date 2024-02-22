@@ -10,6 +10,7 @@ import service.Service;
 import spark.*;
 
 import javax.xml.crypto.Data;
+import java.util.UUID;
 
 public class Server {
 
@@ -35,11 +36,17 @@ public class Server {
 
     public Object register(Request req, Response res) throws DataAccessException {
         var user = new Gson().fromJson(req.body(), UserData.class);
-        user = service.getUser(user);
-        if (user == null){
-            UserData new_user = service.addUser(user);
+        UserData user_check = service.getUser(user);
+        UserData new_user = null;
+        if (user_check == null){
+            new_user = service.addUser(user);
         }
-        return new Gson().toJson(user);
+        else{
+            return "";
+        }
+        AuthData authToken = service.addAuth(new_user);
+        Object result = new Gson().toJson(authToken);
+        return result;
     }
 
     private Object clear(Request req, Response res) throws DataAccessException{

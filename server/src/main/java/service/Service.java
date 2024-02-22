@@ -7,6 +7,7 @@ import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class Service {
 
@@ -24,8 +25,12 @@ public class Service {
         return dataAccess.getUser(user);
     }
 
-    public AuthData createAuth(UserData user, AuthData authData) throws DataAccessException {
-        return dataAccess.createAuth(user, authData);
+    public AuthData addAuth(UserData user) throws DataAccessException {
+        UUID authToken = UUID.randomUUID();
+        String strAuthToken = authToken.toString();
+        String username = user.getUsername();
+        AuthData authData = new AuthData(strAuthToken, username);
+        return dataAccess.addAuth(user, authData);
     }
 
     public void deleteAll() throws DataAccessException {
