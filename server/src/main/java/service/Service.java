@@ -6,6 +6,7 @@ import model.AuthData;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -31,6 +32,18 @@ public class Service {
         String username = user.getUsername();
         AuthData authData = new AuthData(strAuthToken, username);
         return dataAccess.addAuth(user, authData);
+    }
+
+    public AuthData getAuth(AuthData auth) throws DataAccessException{
+        return dataAccess.getAuth(auth);
+    }
+
+    public ArrayList<Object> listGames() throws DataAccessException{
+        return dataAccess.listGames();
+    }
+
+    public void createGame() throws DataAccessException{
+        dataAccess.createGame();
     }
 
     public void deleteAll() throws DataAccessException {

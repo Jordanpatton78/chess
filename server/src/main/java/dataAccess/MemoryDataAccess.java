@@ -1,8 +1,10 @@
 package dataAccess;
 
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -10,6 +12,8 @@ public class MemoryDataAccess implements DataAccess{
 
     static HashMap<String, UserData> userMap = new HashMap<>();
     static HashMap<String, AuthData> authMap = new HashMap<>();
+
+    static HashMap<String, GameData> gameMap = new HashMap<>();
     @Override
     public UserData addUser(UserData user) throws DataAccessException {
         String username = user.getUsername();
@@ -32,6 +36,22 @@ public class MemoryDataAccess implements DataAccess{
         String username = user.getUsername();
         authMap.put(username, authData);
         return authData;
+    }
+
+    @Override
+    public AuthData getAuth(AuthData authData) throws DataAccessException{
+        String authToken = authData.getAuthToken();
+        return authMap.get(authToken);
+    }
+
+    @Override
+    public ArrayList<Object> listGames() throws DataAccessException{
+        return new ArrayList<>(gameMap.values());
+    }
+
+    @Override
+    public void createGame() throws DataAccessException{
+        ;
     }
 
     @Override
