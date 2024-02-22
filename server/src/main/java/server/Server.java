@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
+import dataAccess.MemoryDataAccess;
 import model.AuthData;
 import model.UserData;
 import service.Service;
@@ -13,7 +14,7 @@ import javax.xml.crypto.Data;
 public class Server {
 
     private final Service service;
-    DataAccess dataAccess = new DataAccess();
+    DataAccess dataAccess = new MemoryDataAccess();
 
     public Server() {
         service = new Service(dataAccess);
@@ -26,15 +27,18 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::register);
         Spark.delete("/db", this::clear);
-        Spark.post("/session", this::login);
+//        Spark.post("/session", this::login);
 
         Spark.awaitInitialization();
         return Spark.port();
     }
 
-    private Object register(Request req, Response res) throws DataAccessException {
+    public Object register(Request req, Response res) throws DataAccessException {
         var user = new Gson().fromJson(req.body(), UserData.class);
-        user = service.addUser(user);
+        user = service.getUser(user);
+        if (user == null){
+            UserData new_user = service.addUser(user);
+        }
         return new Gson().toJson(user);
     }
 
@@ -44,13 +48,13 @@ public class Server {
         return "";
     }
 
-    private Object login(Request req, Response res) throws DataAccessException{
-        var user = new Gson().fromJson(req.body(), UserData.class);
-        user = service.getUser(user);
-        var auth = new Gson().fromJson(req.body(), AuthData.class);
-        var authToken = service.createAuth(user, auth);
-        return new Gson().toJson(authToken);
-    }
+//    private Object login(Request req, Response res) throws DataAccessException{
+//        var user = new Gson().fromJson(req.body(), UserData.class);
+//        user = service.getUser(user);
+//        var auth = new Gson().fromJson(req.body(), AuthData.class);
+//        auth = service.createAuth(user, auth);
+//        return new Gson().toJson(auth);
+//    }
 
     public void stop() {
         Spark.stop();

@@ -6,22 +6,14 @@ import model.UserData;
 
 import javax.xml.crypto.Data;
 import java.util.Collection;
+import java.util.HashMap;
 
-public class DataAccess {
-    public UserData addUser(UserData user) throws DataAccessException{
-        return user;
-    }
+public interface DataAccess {
+    public UserData addUser(UserData user) throws DataAccessException;
 
-    public UserData getUser(UserData user) throws DataAccessException{
-        return user;
-    }
+    public UserData getUser(UserData user) throws DataAccessException;
 
-    public AuthData createAuth(UserData user, AuthData authData) throws DataAccessException {
-        return authData;
-    }
+    public AuthData createAuth(UserData user, AuthData authData) throws DataAccessException;
 
-
-    public void deleteAll() throws DataAccessException{
-        ;
-    }
+    public void deleteAll() throws DataAccessException;
 }

@@ -4,6 +4,7 @@ import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
+import org.eclipse.jetty.server.Authentication;
 
 import java.util.Collection;
 
