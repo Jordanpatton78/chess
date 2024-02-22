@@ -13,14 +13,18 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public UserData addUser(UserData user) throws DataAccessException {
         String username = user.getUsername();
-        userMap.put(username, user);
-        return userMap.get(username);
+        String password = user.getPassword();
+        String username_and_password = username + password;
+        userMap.put(username_and_password, user);
+        return userMap.get(username_and_password);
     }
 
     @Override
     public UserData getUser(UserData user) throws DataAccessException {
         String username = user.getUsername();
-        return userMap.get(username);
+        String password = user.getPassword();
+        String username_and_password = username + password;
+        return userMap.get(username_and_password);
     }
 
     @Override
