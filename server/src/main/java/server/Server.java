@@ -5,6 +5,7 @@ import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
 import model.AuthData;
+import model.ErrorData;
 import model.UserData;
 import service.Service;
 import spark.*;
@@ -28,7 +29,7 @@ public class Server {
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::register);
         Spark.delete("/db", this::clear);
-//        Spark.post("/session", this::login);
+        Spark.post("/session", this::login);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -55,13 +56,19 @@ public class Server {
         return "";
     }
 
-//    private Object login(Request req, Response res) throws DataAccessException{
-//        var user = new Gson().fromJson(req.body(), UserData.class);
-//        user = service.getUser(user);
-//        var auth = new Gson().fromJson(req.body(), AuthData.class);
-//        auth = service.createAuth(user, auth);
-//        return new Gson().toJson(auth);
-//    }
+    private Object login(Request req, Response res) throws DataAccessException{
+        var user = new Gson().fromJson(req.body(), UserData.class);
+        UserData user_check = service.getUser(user);
+        if (user_check == null){
+            res.status(401);
+            res.type("application/json");
+            ErrorData error = new ErrorData("401 error");
+            return new Gson().toJson(error);
+        }
+        AuthData authToken = service.addAuth(user);
+        Object result = new Gson().toJson(authToken);
+        return result;
+    }
 
     public void stop() {
         Spark.stop();
