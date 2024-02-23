@@ -31,6 +31,7 @@ public class Server {
         Spark.post("/user", this::register);
         Spark.delete("/db", this::clear);
         Spark.post("/session", this::login);
+        Spark.delete("/session", this::logout);
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
 
@@ -64,7 +65,7 @@ public class Server {
 
     private Object clear(Request req, Response res) throws DataAccessException{
         service.deleteAll();
-        res.status(204);
+        res.status(200);
         return "";
     }
 
@@ -79,6 +80,23 @@ public class Server {
         }
         AuthData authToken = service.addAuth(user);
         Object result = new Gson().toJson(authToken);
+        return result;
+    }
+
+    private Object logout(Request req, Response res) throws DataAccessException {
+
+        String authToken = req.headers("authorization");
+        AuthData auth = new AuthData(authToken, "");
+        // Delete the auth data
+        AuthData auth_check = service.deleteAuth(auth);
+        if (auth_check == null){
+            res.status(401);
+            res.type("application/json");
+            ErrorData error = new ErrorData("Error: Unauthorized");
+            return new Gson().toJson(error);
+        }
+        // Convert the auth data to JSON and return it
+        Object result = new Gson().toJson(auth);
         return result;
     }
 

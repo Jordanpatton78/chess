@@ -33,8 +33,8 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public AuthData addAuth(UserData user, AuthData authData) throws DataAccessException {
-        String username = user.getUsername();
-        authMap.put(username, authData);
+        String authToken = authData.getAuthToken();
+        authMap.put(authToken, authData);
         return authData;
     }
 
@@ -42,6 +42,16 @@ public class MemoryDataAccess implements DataAccess{
     public AuthData getAuth(AuthData authData) throws DataAccessException{
         String authToken = authData.getAuthToken();
         return authMap.get(authToken);
+    }
+
+    @Override
+    public AuthData deleteAuth(AuthData auth) throws DataAccessException{
+        String authToken = auth.getAuthToken();
+        if (authMap.containsKey(authToken)){
+            authMap.remove(authToken);
+            return auth;
+        }
+        return null;
     }
 
     @Override
@@ -56,6 +66,8 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public void deleteAll() throws DataAccessException {
-
+        userMap.clear();
+        authMap.clear();
+        gameMap.clear();
     }
 }

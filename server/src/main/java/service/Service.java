@@ -38,6 +38,10 @@ public class Service {
         return dataAccess.getAuth(auth);
     }
 
+    public AuthData deleteAuth(AuthData auth) throws DataAccessException{
+        return dataAccess.deleteAuth(auth);
+    }
+
     public ArrayList<Object> listGames() throws DataAccessException{
         return dataAccess.listGames();
     }
