@@ -50,7 +50,7 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public void createGame() throws DataAccessException{
+    public void createGame(AuthData auth) throws DataAccessException{
         ;
     }
 

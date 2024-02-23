@@ -21,7 +21,7 @@ public interface DataAccess {
 
     public ArrayList<Object> listGames() throws DataAccessException;
 
-    public void createGame() throws DataAccessException;
+    public void createGame(AuthData authData) throws DataAccessException;
 
     public void deleteAll() throws DataAccessException;
 }

@@ -42,8 +42,8 @@ public class Service {
         return dataAccess.listGames();
     }
 
-    public void createGame() throws DataAccessException{
-        dataAccess.createGame();
+    public void createGame(AuthData auth) throws DataAccessException{
+        dataAccess.createGame(auth);
     }
 
     public void deleteAll() throws DataAccessException {

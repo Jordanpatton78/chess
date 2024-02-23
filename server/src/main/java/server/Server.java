@@ -51,6 +51,12 @@ public class Server {
             ErrorData error = new ErrorData("Error: already taken.");
             return new Gson().toJson(error);
         }
+        if (new_user.getPassword()==null){
+            res.status(400);
+            res.type("application/json");
+            ErrorData error = new ErrorData("Error: bad request");
+            return new Gson().toJson(error);
+        }
         AuthData authToken = service.addAuth(new_user);
         Object result = new Gson().toJson(authToken);
         return result;
@@ -98,7 +104,7 @@ public class Server {
             ErrorData error = new ErrorData("Error: Unauthorized");
             return new Gson().toJson(error);
         }
-        service.createGame();
+        service.createGame(auth);
         return "";
     }
 
