@@ -3,12 +3,14 @@ package service;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.Random;
 
 public class Service {
 
@@ -46,8 +48,26 @@ public class Service {
         return dataAccess.listGames();
     }
 
-    public void createGame(AuthData auth) throws DataAccessException{
-        dataAccess.createGame(auth);
+    public GameData createGame(GameData game) throws DataAccessException{
+        int gameId = game.getGameID();
+        GameData new_game = null;
+        if (gameId == 0){
+            Random rand = new Random();
+            int randomNumber = rand.nextInt(101);
+            new_game = new GameData(randomNumber, game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
+        }else{
+            new_game = game;
+        }
+        return dataAccess.createGame(new_game);
+    }
+
+    public GameData getGame(GameData game) throws DataAccessException{
+        return dataAccess.getGame(game);
+    }
+
+    public GameData updateGame(GameData game) throws DataAccessException{
+
+        return dataAccess.updateGame(game);
     }
 
     public void deleteAll() throws DataAccessException {

@@ -6,12 +6,14 @@ import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
 import model.AuthData;
 import model.ErrorData;
+import model.GameData;
 import model.UserData;
 import service.Service;
 import spark.*;
 
 import javax.xml.crypto.Data;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class Server {
@@ -34,6 +36,7 @@ public class Server {
         Spark.delete("/session", this::logout);
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
+        Spark.put("/game", this::joinGame);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -100,21 +103,31 @@ public class Server {
         return result;
     }
 
-    private Object listGames(Request req, Response res) throws DataAccessException{
-        var auth = new Gson().fromJson(req.body(), AuthData.class);
+    private Object listGames(Request req, Response res) throws DataAccessException {
+        String authToken = req.headers("authorization");
+        var game = new Gson().fromJson(req.body(), GameData.class);
+        AuthData auth = new AuthData(authToken, "");
         AuthData auth_check = service.getAuth(auth);
-        if (auth_check == null){
+        if (auth_check == null) {
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
             return new Gson().toJson(error);
         }
         ArrayList<Object> games = service.listGames();
-        return new Gson().toJson(games);
+
+        // Create a Map to store the games
+        HashMap<String, Object> response = new HashMap<>();
+        response.put("games", games);
+
+        // Convert the Map to JSON using Gson
+        return new Gson().toJson(response);
     }
 
     private Object createGame(Request req, Response res) throws DataAccessException{
-        var auth = new Gson().fromJson(req.body(), AuthData.class);
+        String authToken = req.headers("authorization");
+        var game = new Gson().fromJson(req.body(), GameData.class);
+        AuthData auth = new AuthData(authToken, "");
         AuthData auth_check = service.getAuth(auth);
         if (auth_check == null){
             res.status(401);
@@ -122,8 +135,32 @@ public class Server {
             ErrorData error = new ErrorData("Error: Unauthorized");
             return new Gson().toJson(error);
         }
-        service.createGame(auth);
-        return "";
+        GameData new_game = service.createGame(game);
+        Object result = new Gson().toJson(new_game);
+        return result;
+    }
+
+    private Object joinGame(Request req, Response res) throws DataAccessException{
+        String authToken = req.headers("authorization");
+        var game = new Gson().fromJson(req.body(), GameData.class);
+        AuthData auth = new AuthData(authToken, "");
+        AuthData auth_check = service.getAuth(auth);
+        if (auth_check == null){
+            res.status(401);
+            res.type("application/json");
+            ErrorData error = new ErrorData("Error: Unauthorized");
+            return new Gson().toJson(error);
+        }
+        GameData gameData = service.getGame(game);
+        if (gameData == null){
+            res.status(400);
+            res.type("application/json");
+            ErrorData error = new ErrorData("Error: bad request");
+            return new Gson().toJson(error);
+        }
+        GameData updatedGame = service.updateGame(gameData);
+        Object result = new Gson().toJson(updatedGame);
+        return result;
     }
 
     public void stop() {

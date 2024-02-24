@@ -13,7 +13,7 @@ public class MemoryDataAccess implements DataAccess{
     static HashMap<String, UserData> userMap = new HashMap<>();
     static HashMap<String, AuthData> authMap = new HashMap<>();
 
-    static HashMap<String, GameData> gameMap = new HashMap<>();
+    static HashMap<Integer, GameData> gameMap = new HashMap<>();
     @Override
     public UserData addUser(UserData user) throws DataAccessException {
         String username = user.getUsername();
@@ -60,8 +60,24 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
-    public void createGame(AuthData auth) throws DataAccessException{
-        ;
+    public GameData createGame( GameData game) throws DataAccessException{
+        int gameId = game.getGameID();
+        gameMap.put(gameId, game);
+        return game;
+    }
+
+    @Override
+    public GameData getGame(GameData game) throws DataAccessException{
+        int gameId = game.getGameID();
+        GameData gameData = gameMap.get(gameId);
+        return gameData;
+    }
+
+    @Override
+    public GameData updateGame(GameData game) throws DataAccessException{
+        int gameId = game.getGameID();
+        gameMap.put(gameId, game);
+        return game;
     }
 
     @Override

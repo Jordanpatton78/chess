@@ -2,6 +2,7 @@ package dataAccess;
 
 import dataAccess.DataAccessException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 import javax.xml.crypto.Data;
@@ -23,7 +24,11 @@ public interface DataAccess {
 
     public ArrayList<Object> listGames() throws DataAccessException;
 
-    public void createGame(AuthData authData) throws DataAccessException;
+    public GameData createGame(GameData game) throws DataAccessException;
+
+    public GameData getGame(GameData game) throws DataAccessException;
+
+    public GameData updateGame(GameData game) throws DataAccessException;
 
     public void deleteAll() throws DataAccessException;
 }
