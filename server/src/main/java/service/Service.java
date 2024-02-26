@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import model.AuthData;
@@ -51,10 +52,11 @@ public class Service {
     public GameData createGame(GameData game) throws DataAccessException{
         int gameId = game.getGameID();
         GameData new_game = null;
+        ChessGame chessGame = new ChessGame();
         if (gameId == 0){
             Random rand = new Random();
             int randomNumber = rand.nextInt(101);
-            new_game = new GameData(randomNumber, game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
+            new_game = new GameData(randomNumber, game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), chessGame);
         }else{
             new_game = game;
         }
@@ -65,9 +67,21 @@ public class Service {
         return dataAccess.getGame(game);
     }
 
-    public GameData updateGame(GameData game) throws DataAccessException{
+    public GameData updateGame(String username, GameData game, String playerColor) throws DataAccessException{
+        int gameID = game.getGameID();
+        String white_username = game.whiteUsername();
+        String blackUsername = game.getBlackUsername();
+        if (playerColor == null){
 
-        return dataAccess.updateGame(game);
+        }else if (white_username == null && playerColor.equals("WHITE")){
+            white_username = username;
+        }else if (blackUsername == null && playerColor.equals("BLACK")){
+            blackUsername = username;
+        }
+        String gameName = game.getGameName();
+        ChessGame chessGame = game.getGame();
+        GameData new_game = new GameData(gameID, white_username, blackUsername, gameName, chessGame);
+        return dataAccess.updateGame(new_game);
     }
 
     public void deleteAll() throws DataAccessException {

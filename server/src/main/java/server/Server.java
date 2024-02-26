@@ -1,6 +1,9 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
@@ -151,6 +154,16 @@ public class Server {
             ErrorData error = new ErrorData("Error: Unauthorized");
             return new Gson().toJson(error);
         }
+        // Parse the JSON string
+        JsonObject jsonObject = JsonParser.parseString(req.body()).getAsJsonObject();
+        // Access the "playerColor" attribute
+        String playerColor = "";
+        if (jsonObject.has("playerColor")){
+            playerColor = jsonObject.get("playerColor").getAsString();
+        } else{
+            playerColor = null;
+        }
+        String username = auth_check.getUsername();
         GameData gameData = service.getGame(game);
         if (gameData == null){
             res.status(400);
@@ -158,7 +171,20 @@ public class Server {
             ErrorData error = new ErrorData("Error: bad request");
             return new Gson().toJson(error);
         }
-        GameData updatedGame = service.updateGame(gameData);
+        if (playerColor != null){
+            if (playerColor.equals("BLACK") && gameData.getBlackUsername() != null){
+                res.status(403);
+                res.type("application/json");
+                ErrorData error = new ErrorData("Error: already taken");
+                return new Gson().toJson(error);
+            } else if (playerColor.equals("WHITE") && gameData.getWhiteUsername() != null) {
+                res.status(403);
+                res.type("application/json");
+                ErrorData error = new ErrorData("Error: already taken");
+                return new Gson().toJson(error);
+            }
+        }
+        GameData updatedGame = service.updateGame(username, gameData, playerColor);
         Object result = new Gson().toJson(updatedGame);
         return result;
     }
