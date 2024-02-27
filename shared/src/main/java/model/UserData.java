@@ -11,10 +11,6 @@ public record UserData(String username, String password, String email) {
         return password;
     }
 
-//    public String getEmail(){
-//        return email;
-//    }
-
     public String toString() {
         return new Gson().toJson(this);
     }
