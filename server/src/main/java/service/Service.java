@@ -51,16 +51,16 @@ public class Service {
 
     public GameData createGame(GameData game) throws DataAccessException{
         int gameId = game.getGameID();
-        GameData new_game = null;
+        GameData newGame = null;
         ChessGame chessGame = new ChessGame();
         if (gameId == 0){
             Random rand = new Random();
             int randomNumber = rand.nextInt(101);
-            new_game = new GameData(randomNumber, game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), chessGame);
+            newGame = new GameData(randomNumber, game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), chessGame);
         }else{
-            new_game = game;
+            newGame = game;
         }
-        return dataAccess.createGame(new_game);
+        return dataAccess.createGame(newGame);
     }
 
     public GameData getGame(GameData game) throws DataAccessException{
@@ -69,19 +69,19 @@ public class Service {
 
     public GameData updateGame(String username, GameData game, String playerColor) throws DataAccessException{
         int gameID = game.getGameID();
-        String white_username = game.getWhiteUsername();
+        String whiteUsername = game.getWhiteUsername();
         String blackUsername = game.getBlackUsername();
         if (playerColor == null){
             //
-        }else if (white_username == null && playerColor.equals("WHITE")){
-            white_username = username;
+        }else if (whiteUsername == null && playerColor.equals("WHITE")){
+            whiteUsername = username;
         }else if (blackUsername == null && playerColor.equals("BLACK")){
             blackUsername = username;
         }
         String gameName = game.getGameName();
         ChessGame chessGame = game.getGame();
-        GameData new_game = new GameData(gameID, white_username, blackUsername, gameName, chessGame);
-        return dataAccess.updateGame(new_game);
+        GameData newGame = new GameData(gameID, whiteUsername, blackUsername, gameName, chessGame);
+        return dataAccess.updateGame(newGame);
     }
 
     public void deleteAll() throws DataAccessException {
