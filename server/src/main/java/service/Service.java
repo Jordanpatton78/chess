@@ -69,10 +69,10 @@ public class Service {
 
     public GameData updateGame(String username, GameData game, String playerColor) throws DataAccessException{
         int gameID = game.getGameID();
-        String white_username = game.whiteUsername();
+        String white_username = game.getWhiteUsername();
         String blackUsername = game.getBlackUsername();
         if (playerColor == null){
-
+            //
         }else if (white_username == null && playerColor.equals("WHITE")){
             white_username = username;
         }else if (blackUsername == null && playerColor.equals("BLACK")){
