@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
+import dataAccess.MySQLDataAccess;
 import model.AuthData;
 import model.ErrorData;
 import model.GameData;
@@ -22,7 +23,15 @@ import java.util.UUID;
 public class Server {
 
     private final Service service;
-    DataAccess dataAccess = new MemoryDataAccess();
+    DataAccess dataAccess;
+
+    {
+        try {
+            dataAccess = new MySQLDataAccess();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public Server() {
         service = new Service(dataAccess);
