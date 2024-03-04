@@ -5,7 +5,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,6 +24,28 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public UserData addUser(UserData user) throws DataAccessException {
         // First check to make sure the username doesn't already exist
+        String usernameToCheck = user.getUsername();
+        String query = "SELECT * FROM chess.user WHERE username = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setString(1, usernameToCheck);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // Username already exists
+                    UserData error = new UserData("403", "password", "email");
+                    return error;
+                } else {
+                    // Username doesn't exist
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
         // Then if the username doesn't exist we'll add the data to the db
         var statement = "INSERT INTO chess.user (username, password, email) VALUES (?, ?, ?)";
         var id = executeUpdate(statement, user.username(), user.password(), user.email());
@@ -34,8 +56,33 @@ public class MySQLDataAccess implements DataAccess{
     public UserData getUser(UserData user) throws DataAccessException {
         String username = user.getUsername();
         String password = user.getPassword();
-        String usernameAndPassword = username + password;
-        return userMap.get(usernameAndPassword);
+
+        String query = "SELECT * FROM chess.user WHERE username = ? and password = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // Username already exists
+                    String fetchedUsername = resultSet.getString("username");
+                    String passwordFromDB = resultSet.getString("password");
+                    String email = resultSet.getString("email");
+                    UserData userToReturn = new UserData(fetchedUsername, passwordFromDB, email);
+                    return userToReturn;
+                } else {
+                    // Username doesn't exist
+                    UserData error = new UserData("401", "password", "email");
+                    return error;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
