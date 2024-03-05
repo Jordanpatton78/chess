@@ -141,7 +141,32 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public ArrayList<Object> listGames() throws DataAccessException{
-        return new ArrayList<>(gameMap.values());
+        ArrayList<Object> games = new ArrayList<>();
+        String query = "SELECT * FROM chess.game";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // Game already exists
+                    int gameIDToReturn = resultSet.getInt("gameID");
+                    String whiteUser = resultSet.getString("whiteUsername");
+                    String blackUser = resultSet.getString("blackUsername");
+                    String gameName = resultSet.getString("gameName");
+                    String chessGameString = resultSet.getString("game");
+                    Gson gson = new Gson();
+                    ChessGame chessGame = gson.fromJson(chessGameString, ChessGame.class);
+                    GameData gameToReturn = new GameData(gameIDToReturn, whiteUser, blackUser, gameName, chessGame);
+                    games.add(gameToReturn);
+                } else {
+                    // Game doesn't exist
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        return games;
     }
 
     @Override
@@ -217,9 +242,12 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void deleteAll() throws DataAccessException {
-        userMap.clear();
-        authMap.clear();
-        gameMap.clear();
+        var statement = "DROP TABLE IF EXISTS chess.user";
+        var id = executeUpdate(statement);
+        var statement2 = "DROP TABLE IF EXISTS chess.game";
+        var id2 = executeUpdate(statement2);
+        var statement3 = "DROP TABLE IF EXISTS chess.auth";
+        var id3 = executeUpdate(statement3);
     }
 
     private int executeUpdate(String statement, Object... params) throws DataAccessException {

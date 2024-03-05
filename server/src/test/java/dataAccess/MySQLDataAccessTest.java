@@ -4,7 +4,12 @@ import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 class MySQLDataAccessTest {
 
@@ -16,6 +21,49 @@ class MySQLDataAccessTest {
             throw new RuntimeException(e);
         }
     }
+
+    @BeforeEach
+    void dropDataBases1() throws DataAccessException{
+        dataAccess.deleteAll();
+    }
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  chess.user (
+                username Varchar(255),
+                password Varchar(255),
+                email Varchar(255)
+              )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  chess.game (
+                gameID int,
+                whiteUsername Varchar(255),
+                blackUsername Varchar(255),
+                gameName Varchar(255),
+                game Varchar(255)
+              )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  chess.auth (
+                authToken Varchar(255),
+                username Varchar(255)
+              )
+            """
+    };
+    @BeforeEach
+    void createDataBases2() throws DataAccessException{
+        DatabaseManager.createDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+            for (var statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
+    }
+
     @Test
     void addUserSuccess() throws DataAccessException {
         UserData user = new UserData("jordan", "patton", "my_email");
@@ -112,6 +160,42 @@ class MySQLDataAccessTest {
     @Test
     void getGameFailure() throws DataAccessException{
         GameData game = new GameData(100000, "white", "black", "gameName", new ChessGame());
+        GameData gotGame = dataAccess.getGame(game);
+        assert gotGame.getGameID() == 400;
+    }
+
+    @Test
+    void listGamesSuccess() throws DataAccessException {
+        GameData game = new GameData(1, "white", "black", "gameName", new ChessGame());
+        GameData gameData = dataAccess.createGame(game);
+        GameData game2 = new GameData(2, "white", "black", "gameName", new ChessGame());
+        GameData gameData2 = dataAccess.createGame(game2);
+        ArrayList<Object> games = dataAccess.listGames();
+        assert games.size() == 2;
+    }
+
+    @Test
+    void listGamesFailure() throws DataAccessException{
+        GameData game = new GameData(100000, "white", "black", "gameName", new ChessGame());
+        GameData gotGame = dataAccess.getGame(game);
+        assert gotGame.getGameID() == 400;
+    }
+
+    @Test
+    void deleteAllSuccess() throws DataAccessException{
+        GameData game = new GameData(100000, "white", "black", "gameName", new ChessGame());
+        GameData gameToMake = dataAccess.createGame(game);
+        dataAccess.deleteAll();
+        DatabaseManager.createDatabase();
+        try (var conn = DatabaseManager.getConnection()) {
+            for (var statement : createStatements) {
+                try (var preparedStatement = conn.prepareStatement(statement)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
+        }
         GameData gotGame = dataAccess.getGame(game);
         assert gotGame.getGameID() == 400;
     }
