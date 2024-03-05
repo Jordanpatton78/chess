@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -87,25 +88,55 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public AuthData addAuth(UserData user, AuthData authData) throws DataAccessException {
+        // Then if the username doesn't exist we'll add the data to the db
         String authToken = authData.getAuthToken();
-        authMap.put(authToken, authData);
-        return authData;
+        String username = user.getUsername();
+        if (authToken.isEmpty()){
+            return new AuthData("400", "username");
+        }
+        var statement = "INSERT INTO chess.auth (authToken, username) VALUES (?, ?)";
+        var id = executeUpdate(statement, authToken, username);
+        return new AuthData(authToken, username);
     }
 
     @Override
     public AuthData getAuth(AuthData authData) throws DataAccessException{
+        String username = authData.getUsername();
         String authToken = authData.getAuthToken();
-        return authMap.get(authToken);
+
+        String query = "SELECT * FROM chess.auth WHERE authToken = ? and username = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setString(1, authToken);
+            preparedStatement.setString(2, username);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // Username already exists
+                    String authTokenToReturn = resultSet.getString("authToken");
+                    String usernameToReturn = resultSet.getString("username");
+                    AuthData authToReturn = new AuthData(authTokenToReturn, usernameToReturn);
+                    return authToReturn;
+                } else {
+                    // Username doesn't exist
+                    AuthData error = new AuthData("400", "");
+                    return error;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
     public AuthData deleteAuth(AuthData auth) throws DataAccessException{
         String authToken = auth.getAuthToken();
-        if (authMap.containsKey(authToken)){
-            authMap.remove(authToken);
-            return auth;
-        }
-        return null;
+        var statement = "DELETE FROM chess.auth WHERE authToken = ?";
+        var id = executeUpdate(statement, authToken);
+        return new AuthData(authToken, "");
     }
 
     @Override
@@ -114,17 +145,67 @@ public class MySQLDataAccess implements DataAccess{
     }
 
     @Override
-    public GameData createGame( GameData game) throws DataAccessException{
-        int gameId = game.getGameID();
-        gameMap.put(gameId, game);
-        return game;
+    public GameData createGame(GameData game) throws DataAccessException{
+        int gameIDtoCheck = game.getGameID();
+        String query = "SELECT * FROM chess.game WHERE gameID = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setInt(1, gameIDtoCheck);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // GameID already exists
+                    GameData error = new GameData(403, "", "", "", new ChessGame());
+                    return error;
+                } else {
+                    // GameID doesn't exist
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        var statement = "INSERT INTO chess.game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        Gson gson = new Gson();
+        var id = executeUpdate(statement, game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), gson.toJson(game.getGame()));
+        return new GameData(game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
     }
 
     @Override
     public GameData getGame(GameData game) throws DataAccessException{
-        int gameId = game.getGameID();
-        GameData gameData = gameMap.get(gameId);
-        return gameData;
+        int gameID = game.getGameID();
+
+        String query = "SELECT * FROM chess.game WHERE gameID = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setInt(1, gameID);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // Game already exists
+                    int gameIDToReturn = resultSet.getInt("gameID");
+                    String whiteUser = resultSet.getString("whiteUsername");
+                    String blackUser = resultSet.getString("blackUsername");
+                    String gameName = resultSet.getString("gameName");
+                    String chessGameString = resultSet.getString("game");
+                    Gson gson = new Gson();
+                    ChessGame chessGame = gson.fromJson(chessGameString, ChessGame.class);
+                    GameData gameToReturn = new GameData(gameIDToReturn, whiteUser, blackUser, gameName, chessGame);
+                    return gameToReturn;
+                } else {
+                    // Game doesn't exist
+                    GameData error = new GameData(400, "", "", "", new ChessGame());
+                    return error;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
     @Override
@@ -147,6 +228,7 @@ public class MySQLDataAccess implements DataAccess{
                 for (var i = 0; i < params.length; i++) {
                     var param = params[i];
                     if (param instanceof String s) ps.setString(i + 1, s);
+                    else if (param instanceof Integer num ) ps.setInt(i+1, num);
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
