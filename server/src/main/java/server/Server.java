@@ -58,7 +58,7 @@ public class Server {
         var user = new Gson().fromJson(req.body(), UserData.class);
         UserData userCheck = service.getUser(user);
         UserData newUser = null;
-        if (userCheck == null){
+        if (userCheck.getUsername() != "403"){
             newUser = service.addUser(user);
         }
         else{
@@ -87,7 +87,7 @@ public class Server {
     private Object login(Request req, Response res) throws DataAccessException{
         var user = new Gson().fromJson(req.body(), UserData.class);
         UserData userCheck = service.getUser(user);
-        if (userCheck == null){
+        if (userCheck.getUsername().equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -104,7 +104,7 @@ public class Server {
         AuthData auth = new AuthData(authToken, "");
         // Delete the auth data
         AuthData authCheck = service.deleteAuth(auth);
-        if (authCheck == null){
+        if (authCheck.getUsername().equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -120,7 +120,7 @@ public class Server {
         var game = new Gson().fromJson(req.body(), GameData.class);
         AuthData auth = new AuthData(authToken, "");
         AuthData authCheck = service.getAuth(auth);
-        if (authCheck == null) {
+        if (authCheck.getUsername().equals("401")) {
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -141,7 +141,7 @@ public class Server {
         var game = new Gson().fromJson(req.body(), GameData.class);
         AuthData auth = new AuthData(authToken, "");
         AuthData authCheck = service.getAuth(auth);
-        if (authCheck == null){
+        if (authCheck.equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -157,7 +157,7 @@ public class Server {
         var game = new Gson().fromJson(req.body(), GameData.class);
         AuthData auth = new AuthData(authToken, "");
         AuthData authCheck = service.getAuth(auth);
-        if (authCheck == null){
+        if (authCheck.getUsername().equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -174,7 +174,7 @@ public class Server {
         }
         String username = authCheck.getUsername();
         GameData gameData = service.getGame(game);
-        if (gameData == null){
+        if (gameData.getGameID()==400){
             res.status(400);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: bad request");

@@ -15,10 +15,6 @@ import static java.sql.Types.NULL;
 
 public class MySQLDataAccess implements DataAccess{
 
-    static HashMap<String, UserData> userMap = new HashMap<>();
-    static HashMap<String, AuthData> authMap = new HashMap<>();
-
-    static HashMap<Integer, GameData> gameMap = new HashMap<>();
     public MySQLDataAccess() throws DataAccessException {
         configureDatabase();
     }
@@ -136,7 +132,7 @@ public class MySQLDataAccess implements DataAccess{
         String authToken = auth.getAuthToken();
         var statement = "DELETE FROM chess.auth WHERE authToken = ?";
         var id = executeUpdate(statement, authToken);
-        return new AuthData(authToken, "");
+        return new AuthData(authToken, "401");
     }
 
     @Override
@@ -270,11 +266,11 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void deleteAll() throws DataAccessException {
-        var statement = "DROP TABLE IF EXISTS chess.user";
+        var statement = "DELETE FROM chess.user";
         var id = executeUpdate(statement);
-        var statement2 = "DROP TABLE IF EXISTS chess.game";
+        var statement2 = "DELETE FROM chess.game";
         var id2 = executeUpdate(statement2);
-        var statement3 = "DROP TABLE IF EXISTS chess.auth";
+        var statement3 = "DELETE FROM chess.auth";
         var id3 = executeUpdate(statement3);
     }
 
