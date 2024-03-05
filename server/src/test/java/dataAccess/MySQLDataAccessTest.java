@@ -4,7 +4,6 @@ import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,7 +22,7 @@ class MySQLDataAccessTest {
     }
 
     @BeforeEach
-    void dropDataBases1() throws DataAccessException{
+    void dropDatabases1() throws DataAccessException{
         dataAccess.deleteAll();
     }
     private final String[] createStatements = {
@@ -51,7 +50,7 @@ class MySQLDataAccessTest {
             """
     };
     @BeforeEach
-    void createDataBases2() throws DataAccessException{
+    void createDatabases2() throws DataAccessException{
         DatabaseManager.createDatabase();
         try (var conn = DatabaseManager.getConnection()) {
             for (var statement : createStatements) {
@@ -97,7 +96,7 @@ class MySQLDataAccessTest {
     @Test
     void addAuthSuccess() throws DataAccessException {
         UserData user = new UserData("jordan", "password", "email");
-        AuthData auth = new AuthData("", "jordan");
+        AuthData auth = new AuthData("authToken", "jordan");
         AuthData authData = dataAccess.addAuth(user, auth);
         assert authData.getUsername().equals(user.getUsername());
     }
@@ -145,6 +144,7 @@ class MySQLDataAccessTest {
     @Test
     void createGameFailure() throws DataAccessException{
         GameData game = new GameData(1, "white", "black", "gameName", new ChessGame());
+        game = dataAccess.createGame(game);
         GameData inDatabase = dataAccess.createGame(game);
         assert inDatabase.getGameID() == 403;
     }
@@ -175,7 +175,15 @@ class MySQLDataAccessTest {
     }
 
     @Test
-    void listGamesFailure() throws DataAccessException{
+    void updateGameSuccess() throws DataAccessException {
+        GameData game = new GameData(2, "white", "black", "gameName", new ChessGame());
+        game = dataAccess.createGame(game);
+        GameData new_game = dataAccess.updateGame(game);
+        assert new_game.getGameID() == game.getGameID();
+    }
+
+    @Test
+    void updateGameFailure() throws DataAccessException{
         GameData game = new GameData(100000, "white", "black", "gameName", new ChessGame());
         GameData gotGame = dataAccess.getGame(game);
         assert gotGame.getGameID() == 400;

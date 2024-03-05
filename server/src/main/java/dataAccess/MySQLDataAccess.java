@@ -148,7 +148,7 @@ public class MySQLDataAccess implements DataAccess{
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 // Check if there are any results
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     // Game already exists
                     int gameIDToReturn = resultSet.getInt("gameID");
                     String whiteUser = resultSet.getString("whiteUsername");
@@ -159,8 +159,6 @@ public class MySQLDataAccess implements DataAccess{
                     ChessGame chessGame = gson.fromJson(chessGameString, ChessGame.class);
                     GameData gameToReturn = new GameData(gameIDToReturn, whiteUser, blackUser, gameName, chessGame);
                     games.add(gameToReturn);
-                } else {
-                    // Game doesn't exist
                 }
             }
         } catch (SQLException e) {
@@ -235,9 +233,39 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public GameData updateGame(GameData game) throws DataAccessException{
-        int gameId = game.getGameID();
-        gameMap.put(gameId, game);
-        return game;
+        int gameIDtoCheck = game.getGameID();
+        String query = "SELECT * FROM chess.game WHERE gameID = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setInt(1, gameIDtoCheck);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // GameID already exists
+                    int gameIDToReturn = resultSet.getInt("gameID");
+                    String whiteUser = resultSet.getString("whiteUsername");
+                    String blackUser = resultSet.getString("blackUsername");
+                    String gameName = resultSet.getString("gameName");
+                    String chessGameString = resultSet.getString("game");
+                    Gson gson = new Gson();
+                    ChessGame chessGame = gson.fromJson(chessGameString, ChessGame.class);
+                    GameData gameToReturn = new GameData(gameIDToReturn, whiteUser, blackUser, gameName, chessGame);
+                } else {
+                    // GameID doesn't exist
+                    GameData error = new GameData(400, "", "", "", new ChessGame());
+                    return error;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        var statement = "INSERT INTO chess.game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        Gson gson = new Gson();
+        var id = executeUpdate(statement, game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), gson.toJson(game.getGame()));
+        return new GameData(game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
     }
 
     @Override
