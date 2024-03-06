@@ -58,7 +58,7 @@ public class Server {
         var user = new Gson().fromJson(req.body(), UserData.class);
         UserData userCheck = service.getUser(user);
         UserData newUser = null;
-        if (userCheck.getUsername() != "403"){
+        if (userCheck.getUsername() == "401"){
             newUser = service.addUser(user);
         }
         else{
@@ -104,7 +104,7 @@ public class Server {
         AuthData auth = new AuthData(authToken, "");
         // Delete the auth data
         AuthData authCheck = service.deleteAuth(auth);
-        if (authCheck.getUsername().equals("401")){
+        if (authCheck.getUsername() != "Deleted"){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");

@@ -132,7 +132,7 @@ public class MySQLDataAccess implements DataAccess{
         String authToken = auth.getAuthToken();
         var statement = "DELETE FROM chess.auth WHERE authToken = ?";
         var id = executeUpdate(statement, authToken);
-        return new AuthData(authToken, "401");
+        return new AuthData(authToken, "Deleted");
     }
 
     @Override
