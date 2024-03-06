@@ -120,7 +120,7 @@ public class Server {
         var game = new Gson().fromJson(req.body(), GameData.class);
         AuthData auth = new AuthData(authToken, "");
         AuthData authCheck = service.getAuth(auth);
-        if (authCheck.getUsername().equals("401")) {
+        if (authCheck.getAuthToken().equals("401")) {
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -141,7 +141,7 @@ public class Server {
         var game = new Gson().fromJson(req.body(), GameData.class);
         AuthData auth = new AuthData(authToken, "");
         AuthData authCheck = service.getAuth(auth);
-        if (authCheck.equals("401")){
+        if (authCheck.getAuthToken().equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");
@@ -157,7 +157,7 @@ public class Server {
         var game = new Gson().fromJson(req.body(), GameData.class);
         AuthData auth = new AuthData(authToken, "");
         AuthData authCheck = service.getAuth(auth);
-        if (authCheck.getUsername().equals("401")){
+        if (authCheck.getAuthToken().equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");

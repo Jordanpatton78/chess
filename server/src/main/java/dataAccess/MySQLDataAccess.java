@@ -100,25 +100,24 @@ public class MySQLDataAccess implements DataAccess{
         String username = authData.getUsername();
         String authToken = authData.getAuthToken();
 
-        String query = "SELECT * FROM chess.auth WHERE authToken = ? and username = ?";
+        String query = "SELECT * FROM chess.auth WHERE authToken = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             // Set the parameter for the prepared statement
             preparedStatement.setString(1, authToken);
-            preparedStatement.setString(2, username);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 // Check if there are any results
                 if (resultSet.next()) {
-                    // Username already exists
+                    // AuthToken already exists
                     String authTokenToReturn = resultSet.getString("authToken");
                     String usernameToReturn = resultSet.getString("username");
                     AuthData authToReturn = new AuthData(authTokenToReturn, usernameToReturn);
                     return authToReturn;
                 } else {
-                    // Username doesn't exist
-                    AuthData error = new AuthData("400", "");
+                    // AuthToken doesn't exist
+                    AuthData error = new AuthData("401", "");
                     return error;
                 }
             }
