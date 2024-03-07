@@ -112,7 +112,7 @@ class MySQLDataAccessTest {
     @Test
     void getAuthSuccess() throws DataAccessException {
         UserData user = new UserData("jordan", "password", "email");
-        AuthData auth = new AuthData("", "jordan");
+        AuthData auth = new AuthData("100", "jordan");
         AuthData authData = dataAccess.addAuth(user, auth);
         AuthData gotAuthData = dataAccess.getAuth(authData);
         assert authData.getAuthToken().equals(gotAuthData.getAuthToken());
@@ -122,7 +122,7 @@ class MySQLDataAccessTest {
     void getAuthFailure() throws DataAccessException{
         AuthData auth = new AuthData("auth_not_in_db", "");
         AuthData authData = dataAccess.getAuth(auth);
-        assert authData.getAuthToken().equals("400");
+        assert authData.getAuthToken().equals("401");
     }
 
     @Test
