@@ -31,14 +31,14 @@ class MySQLDataAccessTest {
     }
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  chess.user (
+            CREATE TABLE IF NOT EXISTS  user (
                 username Varchar(255),
                 password Varchar(255),
                 email Varchar(255)
               )
             """,
             """
-            CREATE TABLE IF NOT EXISTS  chess.game (
+            CREATE TABLE IF NOT EXISTS  game (
                 gameID int,
                 whiteUsername Varchar(255),
                 blackUsername Varchar(255),
@@ -47,7 +47,7 @@ class MySQLDataAccessTest {
               )
             """,
             """
-            CREATE TABLE IF NOT EXISTS  chess.auth (
+            CREATE TABLE IF NOT EXISTS  auth (
                 authToken Varchar(255),
                 username Varchar(255)
               )
