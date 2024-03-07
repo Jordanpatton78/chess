@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -44,9 +45,15 @@ public class MySQLDataAccess implements DataAccess{
         }
 
         // Then if the username doesn't exist we'll add the data to the db
+        if (user.getPassword() == null){
+            UserData error = new UserData("400", "password", "email");
+            return error;
+        }
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String hashedPassword = encoder.encode(user.password());
         var statement = "INSERT INTO chess.user (username, password, email) VALUES (?, ?, ?)";
-        var id = executeUpdate(statement, user.username(), user.password(), user.email());
-        return new UserData(user.username(), user.password(), user.email());
+        var id = executeUpdate(statement, user.username(), hashedPassword, user.email());
+        return new UserData(user.username(), hashedPassword, user.email());
     }
 
     @Override
@@ -54,23 +61,32 @@ public class MySQLDataAccess implements DataAccess{
         String username = user.getUsername();
         String password = user.getPassword();
 
-        String query = "SELECT * FROM chess.user WHERE username = ? and password = ?";
+        String query = "SELECT * FROM chess.user WHERE username = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
             // Set the parameter for the prepared statement
             preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
 
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 // Check if there are any results
                 if (resultSet.next()) {
-                    // Username already exists
+                    // Username exists, retrieve hashed password from the database
                     String fetchedUsername = resultSet.getString("username");
-                    String passwordFromDB = resultSet.getString("password");
-                    String email = resultSet.getString("email");
-                    UserData userToReturn = new UserData(fetchedUsername, passwordFromDB, email);
-                    return userToReturn;
+                    String hashedPasswordFromDB = resultSet.getString("password");
+                    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+                    // Check if the provided password matches the hashed password from the database
+                    if (encoder.matches(password, hashedPasswordFromDB)) {
+                        // Passwords match, create and return user data
+                        String email = resultSet.getString("email");
+                        UserData userToReturn = new UserData(fetchedUsername, password, email);
+                        return userToReturn;
+                    } else {
+                        // Passwords don't match
+                        UserData error = new UserData("401", "password", "email");
+                        return error;
+                    }
                 } else {
                     // Username doesn't exist
                     UserData error = new UserData("401", "password", "email");
@@ -81,6 +97,7 @@ public class MySQLDataAccess implements DataAccess{
             throw new DataAccessException(e.getMessage());
         }
     }
+
 
     @Override
     public AuthData addAuth(UserData user, AuthData authData) throws DataAccessException {

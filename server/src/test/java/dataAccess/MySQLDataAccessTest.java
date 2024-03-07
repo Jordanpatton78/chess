@@ -81,9 +81,9 @@ class MySQLDataAccessTest {
     @Test
     void getUserSuccess() throws DataAccessException {
         UserData user = new UserData("jordan", "patton", "my_email");
-        user = dataAccess.addUser(user);
+        UserData added_user = dataAccess.addUser(user);
         UserData new_user = dataAccess.getUser(user);
-        assert new_user.getUsername().equals(user.getUsername());
+        assert new_user.getUsername().equals(added_user.getUsername());
     }
 
     @Test

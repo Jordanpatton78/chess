@@ -58,25 +58,27 @@ public class Server {
         var user = new Gson().fromJson(req.body(), UserData.class);
         UserData userCheck = service.getUser(user);
         UserData newUser = null;
-        if (userCheck.getUsername() == "401"){
+
+        if (userCheck.getUsername().equals("401")) {
             newUser = service.addUser(user);
-        }
-        else{
+            if (newUser.getUsername().equals("400")){
+                res.status(400);
+                res.type("application/json");
+                ErrorData error = new ErrorData("Error: already taken.");
+                return new Gson().toJson(error);
+            }
+            AuthData authToken = service.addAuth(newUser);
+            res.status(200);
+            res.type("application/json");
+            return new Gson().toJson(authToken);
+        } else {
             res.status(403);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: already taken.");
             return new Gson().toJson(error);
         }
-        if (newUser.getPassword()==null){
-            res.status(400);
-            res.type("application/json");
-            ErrorData error = new ErrorData("Error: bad request");
-            return new Gson().toJson(error);
-        }
-        AuthData authToken = service.addAuth(newUser);
-        Object result = new Gson().toJson(authToken);
-        return result;
     }
+
 
     private Object clear(Request req, Response res) throws DataAccessException{
         service.deleteAll();
