@@ -179,6 +179,12 @@ class MySQLDataAccessTest {
     }
 
     @Test
+    void listGamesFailure() throws DataAccessException {
+        ArrayList<Object> games = dataAccess.listGames();
+        assert games.size() == 0;
+    }
+
+    @Test
     void updateGameSuccess() throws DataAccessException {
         GameData game = new GameData(2, "white", "black", "gameName", new ChessGame());
         game = dataAccess.createGame(game);
