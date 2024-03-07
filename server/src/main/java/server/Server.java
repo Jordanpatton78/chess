@@ -104,7 +104,7 @@ public class Server {
         AuthData auth = new AuthData(authToken, "");
         // Delete the auth data
         AuthData authCheck = service.deleteAuth(auth);
-        if (authCheck.getUsername() != "Deleted"){
+        if (authCheck.getAuthToken().equals("401")){
             res.status(401);
             res.type("application/json");
             ErrorData error = new ErrorData("Error: Unauthorized");

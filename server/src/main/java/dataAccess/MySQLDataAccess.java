@@ -128,10 +128,34 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public AuthData deleteAuth(AuthData auth) throws DataAccessException{
+        // Get Auth to verify
+        String username = auth.getUsername();
         String authToken = auth.getAuthToken();
-        var statement = "DELETE FROM chess.auth WHERE authToken = ?";
-        var id = executeUpdate(statement, authToken);
-        return new AuthData(authToken, "Deleted");
+
+        String query = "SELECT * FROM chess.auth WHERE authToken = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setString(1, authToken);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // AuthToken already exists
+                    var statement = "DELETE FROM chess.auth WHERE authToken = ?";
+                    var id = executeUpdate(statement, authToken);
+                    return new AuthData(authToken, "Deleted");
+                } else {
+                    // AuthToken doesn't exist
+                    AuthData error = new AuthData("401", "");
+                    return error;
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+
     }
 
     @Override
