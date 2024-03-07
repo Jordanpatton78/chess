@@ -23,7 +23,7 @@ public class MySQLDataAccess implements DataAccess{
     public UserData addUser(UserData user) throws DataAccessException {
         // First check to make sure the username doesn't already exist
         String usernameToCheck = user.getUsername();
-        String query = "SELECT * FROM chess.user WHERE username = ?";
+        String query = "SELECT * FROM user WHERE username = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -51,7 +51,7 @@ public class MySQLDataAccess implements DataAccess{
         }
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         String hashedPassword = encoder.encode(user.password());
-        var statement = "INSERT INTO chess.user (username, password, email) VALUES (?, ?, ?)";
+        var statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
         var id = executeUpdate(statement, user.username(), hashedPassword, user.email());
         return new UserData(user.username(), hashedPassword, user.email());
     }
@@ -61,7 +61,7 @@ public class MySQLDataAccess implements DataAccess{
         String username = user.getUsername();
         String password = user.getPassword();
 
-        String query = "SELECT * FROM chess.user WHERE username = ?";
+        String query = "SELECT * FROM user WHERE username = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -107,7 +107,7 @@ public class MySQLDataAccess implements DataAccess{
         if (authToken.isEmpty()){
             return new AuthData("400", "username");
         }
-        var statement = "INSERT INTO chess.auth (authToken, username) VALUES (?, ?)";
+        var statement = "INSERT INTO auth (authToken, username) VALUES (?, ?)";
         var id = executeUpdate(statement, authToken, username);
         return new AuthData(authToken, username);
     }
@@ -117,7 +117,7 @@ public class MySQLDataAccess implements DataAccess{
         String username = authData.getUsername();
         String authToken = authData.getAuthToken();
 
-        String query = "SELECT * FROM chess.auth WHERE authToken = ?";
+        String query = "SELECT * FROM auth WHERE authToken = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -149,7 +149,7 @@ public class MySQLDataAccess implements DataAccess{
         String username = auth.getUsername();
         String authToken = auth.getAuthToken();
 
-        String query = "SELECT * FROM chess.auth WHERE authToken = ?";
+        String query = "SELECT * FROM auth WHERE authToken = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -160,7 +160,7 @@ public class MySQLDataAccess implements DataAccess{
                 // Check if there are any results
                 if (resultSet.next()) {
                     // AuthToken already exists
-                    var statement = "DELETE FROM chess.auth WHERE authToken = ?";
+                    var statement = "DELETE FROM auth WHERE authToken = ?";
                     var id = executeUpdate(statement, authToken);
                     return new AuthData(authToken, "Deleted");
                 } else {
@@ -178,7 +178,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public ArrayList<Object> listGames() throws DataAccessException{
         ArrayList<Object> games = new ArrayList<>();
-        String query = "SELECT * FROM chess.game";
+        String query = "SELECT * FROM game";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -206,7 +206,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public GameData createGame(GameData game) throws DataAccessException{
         int gameIDtoCheck = game.getGameID();
-        String query = "SELECT * FROM chess.game WHERE gameID = ?";
+        String query = "SELECT * FROM game WHERE gameID = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -226,7 +226,7 @@ public class MySQLDataAccess implements DataAccess{
         } catch (SQLException e) {
             throw new DataAccessException(e.getMessage());
         }
-        var statement = "INSERT INTO chess.game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        var statement = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         Gson gson = new Gson();
         var id = executeUpdate(statement, game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), gson.toJson(game.getGame()));
         return new GameData(game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
@@ -236,7 +236,7 @@ public class MySQLDataAccess implements DataAccess{
     public GameData getGame(GameData game) throws DataAccessException{
         int gameID = game.getGameID();
 
-        String query = "SELECT * FROM chess.game WHERE gameID = ?";
+        String query = "SELECT * FROM game WHERE gameID = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -270,7 +270,7 @@ public class MySQLDataAccess implements DataAccess{
     @Override
     public GameData updateGame(GameData game) throws DataAccessException {
         int gameIDtoCheck = game.getGameID();
-        String query = "SELECT * FROM chess.game WHERE gameID = ?";
+        String query = "SELECT * FROM game WHERE gameID = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
@@ -283,7 +283,7 @@ public class MySQLDataAccess implements DataAccess{
                     // GameID already exists
                     int gameIDToReturn = resultSet.getInt("gameID");
                     // Update the existing data with new whiteUsername and blackUsername
-                    String updateStatement = "UPDATE chess.game SET whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
+                    String updateStatement = "UPDATE game SET whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
                     try (PreparedStatement updatePreparedStatement = connection.prepareStatement(updateStatement)) {
                         updatePreparedStatement.setString(1, game.getWhiteUsername());
                         updatePreparedStatement.setString(2, game.getBlackUsername());
@@ -307,11 +307,11 @@ public class MySQLDataAccess implements DataAccess{
 
     @Override
     public void deleteAll() throws DataAccessException {
-        var statement = "DELETE FROM chess.user";
+        var statement = "DELETE FROM user";
         var id = executeUpdate(statement);
-        var statement2 = "DELETE FROM chess.game";
+        var statement2 = "DELETE FROM game";
         var id2 = executeUpdate(statement2);
-        var statement3 = "DELETE FROM chess.auth";
+        var statement3 = "DELETE FROM auth";
         var id3 = executeUpdate(statement3);
     }
 
@@ -340,14 +340,14 @@ public class MySQLDataAccess implements DataAccess{
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  chess.user (
+            CREATE TABLE IF NOT EXISTS  user (
                 username Varchar(255),
                 password Varchar(255),
                 email Varchar(255)
               )
             """,
             """
-            CREATE TABLE IF NOT EXISTS  chess.game (
+            CREATE TABLE IF NOT EXISTS  game (
                 gameID int,
                 whiteUsername Varchar(255),
                 blackUsername Varchar(255),
@@ -356,7 +356,7 @@ public class MySQLDataAccess implements DataAccess{
               )
             """,
             """
-            CREATE TABLE IF NOT EXISTS  chess.auth (
+            CREATE TABLE IF NOT EXISTS  auth (
                 authToken Varchar(255),
                 username Varchar(255)
               )
