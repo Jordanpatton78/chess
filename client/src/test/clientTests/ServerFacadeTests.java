@@ -11,6 +11,7 @@ import org.junit.jupiter.api.*;
 import server.ServerFacade;
 import server.Server;
 
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -121,4 +122,21 @@ public class ServerFacadeTests {
         });
     }
 
+    @Test
+    public void logoutTestPositive() throws ResponseException, URISyntaxException {
+        UserData user = new UserData("username", "password", "email");
+        AuthData registeredUser = facade.register(user);
+        AuthData loggedOutUser = facade.logout(registeredUser);
+        assert loggedOutUser.getAuthToken().equals(registeredUser.getAuthToken());
+    }
+
+    @Test
+    public void logoutTestNegative() throws ResponseException {
+        UserData user = new UserData("username", "password", "email");
+        AuthData fakeAuth = new AuthData("Fake Auth Token", "");
+        assertThrows(ResponseException.class, () -> {
+            facade.register(user);
+            facade.logout(fakeAuth);
+        });
+    }
 }

@@ -30,12 +30,12 @@ public class ServerFacade {
 
     public AuthData login(UserData user) throws ResponseException {
         var path = "/session";
-        return this.makeRequest("POST", path, user, AuthData.class);
+        return this.makeRequest("POST", path, user, null, AuthData.class);
     }
 
     public AuthData register(UserData user) throws ResponseException {
         var path = "/user";
-        return this.makeRequest("POST", path, user, AuthData.class);
+        return this.makeRequest("POST", path, user, null, AuthData.class);
     }
 //
 //    public void postLoginHelp() throws ResponseException {
@@ -43,10 +43,11 @@ public class ServerFacade {
 //        return this.makeRequest("POST", path, pet, Pet.class);
 //    }
 //
-//    public void logout() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
+    public AuthData logout(AuthData auth) throws ResponseException, URISyntaxException {
+        var path = "/session";
+        String authToken = auth.getAuthToken();
+        return this.makeRequest("DELETE", path, auth, authToken, AuthData.class);
+    }
 //
 //    public void createGame() throws ResponseException {
 //        var path = "/pet";
@@ -91,10 +92,13 @@ public class ServerFacade {
 //        return response.pet();
 //    }
 
-    private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, String headers, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            if (headers != null){
+                http.setRequestProperty("authorization", headers);
+            }
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
