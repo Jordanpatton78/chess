@@ -2,6 +2,8 @@ package server;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.AuthData;
+import model.UserData;
 //import model.Pet;
 
 import java.io.*;
@@ -16,55 +18,55 @@ public class ServerFacade {
     }
 
 
-    public void preLoginHelp() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
+//    public void preLoginHelp() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+//
+//    public void quit() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+
+    public AuthData login(UserData user) throws ResponseException {
+        var path = "/session";
+        return this.makeRequest("POST", path, user, AuthData.class);
     }
 
-    public void quit() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
+    public AuthData register(UserData user) throws ResponseException {
+        var path = "/user";
+        return this.makeRequest("POST", path, user, AuthData.class);
     }
-
-    public void login() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void register() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void postLoginHelp() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void logout() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void createGame() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void listGames() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void joinGame() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
-
-    public void joinObserver() throws ResponseException {
-        var path = "/pet";
-        return this.makeRequest("POST", path, pet, Pet.class);
-    }
+//
+//    public void postLoginHelp() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+//
+//    public void logout() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+//
+//    public void createGame() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+//
+//    public void listGames() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+//
+//    public void joinGame() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
+//
+//    public void joinObserver() throws ResponseException {
+//        var path = "/pet";
+//        return this.makeRequest("POST", path, pet, Pet.class);
+//    }
 
 //    public Pet addPet(Pet pet) throws ResponseException {
 //        var path = "/pet";
