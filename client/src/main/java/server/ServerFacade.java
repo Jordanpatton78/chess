@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -8,7 +9,11 @@ import model.UserData;
 //import model.Pet;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class ServerFacade {
 
@@ -56,10 +61,53 @@ public class ServerFacade {
         return this.makeRequest("POST", path, game, authToken, GameData.class);
     }
 //
-//    public void listGames() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
+public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
+    var path = "/game";
+    String authToken = auth.getAuthToken();
+    try {
+        URL url = (new URI(serverUrl + path)).toURL();
+        HttpURLConnection http = (HttpURLConnection) url.openConnection();
+        if (authToken != null){
+            http.setRequestProperty("authorization", authToken);
+        }
+        http.setRequestMethod("GET");
+        http.setDoOutput(true);
+        http.connect();
+
+        // Read response
+        ArrayList<GameData> gamesList = null;
+        int responseCode = http.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            InputStreamReader reader = new InputStreamReader(http.getInputStream());
+
+            // Convert JSON response to HashMap
+            Gson gson = new Gson();
+            Type type = new TypeToken<HashMap<String, ArrayList<GameData>>>() {}.getType();
+            HashMap<String, ArrayList<GameData>> resultMap = gson.fromJson(reader, type);
+
+            // Extract the "games" array
+            gamesList = resultMap.get("games");
+            return gamesList;
+        } else {
+            throw new ResponseException(responseCode, "Error occurred: " + http.getResponseMessage());
+        }
+    } catch (Exception ex) {
+        throw new ResponseException(500, ex.getMessage());
+    }
+}
+
+private HashMap<String, Object> convertJsonToHashMap(String jsonResponse) {
+    // Your implementation to parse JSON and create a HashMap
+    // Example:
+    // Gson gson = new Gson();
+    // Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
+    // return gson.fromJson(jsonResponse, type);
+
+    // Dummy implementation
+    HashMap<String, Object> dummyMap = new HashMap<>();
+    dummyMap.put("dummyKey", "dummyValue");
+    return dummyMap;
+}
 //
 //    public void joinGame() throws ResponseException {
 //        var path = "/pet";
@@ -86,13 +134,6 @@ public class ServerFacade {
 //        this.makeRequest("DELETE", path, null, null);
 //    }
 //
-//    public Pet[] listPets() throws ResponseException {
-//        var path = "/pet";
-//        record listPetResponse(Pet[] pet) {
-//        }
-//        var response = this.makeRequest("GET", path, null, listPetResponse.class);
-//        return response.pet();
-//    }
 
     private <T> T makeRequest(String method, String path, Object request, String headers, Class<T> responseClass) throws ResponseException {
         try {

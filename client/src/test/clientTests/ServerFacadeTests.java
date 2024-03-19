@@ -14,6 +14,8 @@ import server.Server;
 
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -158,6 +160,31 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> {
             facade.register(user);
             GameData createdGame = facade.createGame(fakeAuth, game);
+        });
+    }
+
+    @Test
+    public void listGamesPositive() throws ResponseException, URISyntaxException {
+        UserData user = new UserData("username", "password", "email");
+        GameData game = new GameData(10, "", "", "gameName", null);
+        GameData game2 = new GameData(11, "", "", "gameName", null);
+        GameData game3 = new GameData(12, "", "", "gameName", null);
+        AuthData registeredUser = facade.register(user);
+        GameData createdGame = facade.createGame(registeredUser, game);
+        GameData createdGame2 = facade.createGame(registeredUser, game2);
+        GameData createdGame3 = facade.createGame(registeredUser, game3);
+        ArrayList<GameData> listOfGames = facade.listGames(registeredUser);
+        assert listOfGames.size() == 3;
+    }
+
+    @Test
+    public void listGamesNegative() throws ResponseException {
+        UserData user = new UserData("username", "password", "email");
+        GameData game = new GameData(10, "", "", "gameName", null);
+        AuthData fakeAuth = new AuthData("Fake token", "");
+        assertThrows(ResponseException.class, () -> {
+            facade.register(user);
+            ArrayList listOfGames = facade.listGames(fakeAuth);
         });
     }
 }
