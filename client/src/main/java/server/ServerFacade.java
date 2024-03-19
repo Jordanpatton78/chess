@@ -95,19 +95,6 @@ public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
         throw new ResponseException(500, ex.getMessage());
     }
 }
-
-private HashMap<String, Object> convertJsonToHashMap(String jsonResponse) {
-    // Your implementation to parse JSON and create a HashMap
-    // Example:
-    // Gson gson = new Gson();
-    // Type type = new TypeToken<HashMap<String, Object>>(){}.getType();
-    // return gson.fromJson(jsonResponse, type);
-
-    // Dummy implementation
-    HashMap<String, Object> dummyMap = new HashMap<>();
-    dummyMap.put("dummyKey", "dummyValue");
-    return dummyMap;
-}
 //
 //    public void joinGame() throws ResponseException {
 //        var path = "/pet";
