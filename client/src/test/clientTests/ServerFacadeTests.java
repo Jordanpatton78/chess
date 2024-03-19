@@ -111,4 +111,14 @@ public class ServerFacadeTests {
         assert loggedInUser.getUsername().equals(user.getUsername());
     }
 
+    @Test
+    public void loginTestNegative() throws ResponseException {
+        UserData user = new UserData("username", "password", "email");
+        UserData fakeUser = new UserData("New User", "password", "email");
+        assertThrows(ResponseException.class, () -> {
+            facade.register(user);
+            facade.login(fakeUser);
+        });
+    }
+
 }
