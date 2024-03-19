@@ -6,6 +6,7 @@ import dataAccess.DatabaseManager;
 import dataAccess.MySQLDataAccess;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.ServerFacade;
@@ -137,6 +138,26 @@ public class ServerFacadeTests {
         assertThrows(ResponseException.class, () -> {
             facade.register(user);
             facade.logout(fakeAuth);
+        });
+    }
+
+    @Test
+    public void createGamePositive() throws ResponseException, URISyntaxException {
+        UserData user = new UserData("username", "password", "email");
+        GameData game = new GameData(10, "", "", "gameName", null);
+        AuthData registeredUser = facade.register(user);
+        GameData createdGame = facade.createGame(registeredUser, game);
+        assert createdGame.getGameID() == game.getGameID();
+    }
+
+    @Test
+    public void createGameNegative() throws ResponseException {
+        UserData user = new UserData("username", "password", "email");
+        GameData game = new GameData(10, "", "", "gameName", null);
+        AuthData fakeAuth = new AuthData("Fake token", "");
+        assertThrows(ResponseException.class, () -> {
+            facade.register(user);
+            GameData createdGame = facade.createGame(fakeAuth, game);
         });
     }
 }

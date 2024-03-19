@@ -3,6 +3,7 @@ package server;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 //import model.Pet;
 
@@ -49,10 +50,11 @@ public class ServerFacade {
         return this.makeRequest("DELETE", path, auth, authToken, AuthData.class);
     }
 //
-//    public void createGame() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
+    public GameData createGame(AuthData auth, GameData game) throws ResponseException {
+        var path = "/game";
+        String authToken = auth.getAuthToken();
+        return this.makeRequest("POST", path, game, authToken, GameData.class);
+    }
 //
 //    public void listGames() throws ResponseException {
 //        var path = "/pet";
