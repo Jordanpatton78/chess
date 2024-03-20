@@ -105,10 +105,16 @@ public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
         return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
     }
 //
-//    public void joinObserver() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
+    public GameData joinObserver(AuthData auth, GameData game, String playerColor) throws ResponseException {
+        assert playerColor == null;
+        var path = "/game";
+        int gameID = game.getGameID();
+        Gson gson = new Gson();
+        String json = "{\"playerColor\":" + playerColor + ",\"gameID\":" + gameID + "}";
+        String authToken = auth.getAuthToken();
+        JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
+        return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
+    }
 
 //    public Pet addPet(Pet pet) throws ResponseException {
 //        var path = "/pet";
