@@ -187,4 +187,25 @@ public class ServerFacadeTests {
             ArrayList listOfGames = facade.listGames(fakeAuth);
         });
     }
+
+    @Test
+    public void joinGamePositive() throws ResponseException, URISyntaxException {
+        UserData user = new UserData("username", "password", "email");
+        GameData game = new GameData(10, null, null, "gameName", null);
+        AuthData registeredUser = facade.register(user);
+        GameData createdGame = facade.createGame(registeredUser, game);
+        GameData joinedGame = facade.joinGame(registeredUser, game, "BLACK");
+        assert joinedGame.getBlackUsername().equals(registeredUser.getUsername());
+    }
+
+    @Test
+    public void joinGameNegative() throws ResponseException, URISyntaxException {
+        UserData user = new UserData("username", "password", "email");
+        GameData game = new GameData(10, "whiteUsername", null, "gameName", null);
+        AuthData registeredUser = facade.register(user);
+        GameData createdGame = facade.createGame(registeredUser, game);
+        assertThrows(ResponseException.class, () -> {
+            GameData joinedGame = facade.joinGame(registeredUser, game, "WHITE");
+        });
+    }
 }

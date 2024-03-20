@@ -1,19 +1,18 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-//import model.Pet;
 
 import java.io.*;
 import java.lang.reflect.Type;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 
 public class ServerFacade {
 
@@ -36,12 +35,12 @@ public class ServerFacade {
 
     public AuthData login(UserData user) throws ResponseException {
         var path = "/session";
-        return this.makeRequest("POST", path, user, null, AuthData.class);
+        return this.makeRequest("POST", path, user, null, null, AuthData.class);
     }
 
     public AuthData register(UserData user) throws ResponseException {
         var path = "/user";
-        return this.makeRequest("POST", path, user, null, AuthData.class);
+        return this.makeRequest("POST", path, user, null, null, AuthData.class);
     }
 //
 //    public void postLoginHelp() throws ResponseException {
@@ -52,13 +51,13 @@ public class ServerFacade {
     public AuthData logout(AuthData auth) throws ResponseException, URISyntaxException {
         var path = "/session";
         String authToken = auth.getAuthToken();
-        return this.makeRequest("DELETE", path, auth, authToken, AuthData.class);
+        return this.makeRequest("DELETE", path, auth, authToken, null, AuthData.class);
     }
 //
     public GameData createGame(AuthData auth, GameData game) throws ResponseException {
         var path = "/game";
         String authToken = auth.getAuthToken();
-        return this.makeRequest("POST", path, game, authToken, GameData.class);
+        return this.makeRequest("POST", path, game, authToken, null, GameData.class);
     }
 //
 public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
@@ -96,10 +95,15 @@ public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
     }
 }
 //
-//    public void joinGame() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
+    public GameData joinGame(AuthData auth, GameData game, String playerColor) throws ResponseException {
+        var path = "/game";
+        int gameID = game.getGameID();
+        Gson gson = new Gson();
+        String json = "{\"playerColor\":" + playerColor + ",\"gameID\":" + gameID + "}";
+        String authToken = auth.getAuthToken();
+        JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
+        return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
+    }
 //
 //    public void joinObserver() throws ResponseException {
 //        var path = "/pet";
@@ -122,12 +126,15 @@ public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
 //    }
 //
 
-    private <T> T makeRequest(String method, String path, Object request, String headers, Class<T> responseClass) throws ResponseException {
+    private <T> T makeRequest(String method, String path, Object request, String auth, String playerColor, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();
             HttpURLConnection http = (HttpURLConnection) url.openConnection();
-            if (headers != null){
-                http.setRequestProperty("authorization", headers);
+            if (auth != null){
+                http.setRequestProperty("authorization", auth);
+            }
+            if (playerColor != null){
+                http.setRequestProperty("playerColor", playerColor);
             }
             http.setRequestMethod(method);
             http.setDoOutput(true);
