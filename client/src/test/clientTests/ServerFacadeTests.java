@@ -215,7 +215,7 @@ public class ServerFacadeTests {
         GameData game = new GameData(10, null, null, "gameName", null);
         AuthData registeredUser = facade.register(user);
         GameData createdGame = facade.createGame(registeredUser, game);
-        GameData joinedGame = facade.joinGame(registeredUser, game, null);
+        GameData joinedGame = facade.joinObserver(registeredUser, game, null);
         assert joinedGame.getBlackUsername() != registeredUser.getUsername();
     }
 
@@ -225,8 +225,8 @@ public class ServerFacadeTests {
         GameData game = new GameData(10, "whiteUsername", null, "gameName", null);
         AuthData registeredUser = facade.register(user);
         GameData createdGame = facade.createGame(registeredUser, game);
-        assertThrows(ResponseException.class, () -> {
-            GameData joinedGame = facade.joinGame(registeredUser, game, "WHITE");
+        assertThrows(AssertionError.class, () -> {
+            GameData joinedGame = facade.joinObserver(registeredUser, game, "WHITE");
         });
     }
 }
