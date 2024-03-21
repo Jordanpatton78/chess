@@ -48,7 +48,7 @@ public class ServerFacade {
 //        return this.makeRequest("POST", path, pet, Pet.class);
 //    }
 //
-    public AuthData logout(AuthData auth) throws ResponseException, URISyntaxException {
+    public AuthData logout(AuthData auth) throws ResponseException {
         var path = "/session";
         String authToken = auth.getAuthToken();
         return this.makeRequest("DELETE", path, auth, authToken, null, AuthData.class);
