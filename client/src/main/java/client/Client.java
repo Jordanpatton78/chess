@@ -30,6 +30,7 @@ public class Client {
             return """
                     - Register <USERNAME> <PASSWORD> <EMAIL>
                     - Login <USERNAME> <PASSWORD>
+                    - Help
                     - Quit
                     """;
         }
@@ -39,6 +40,7 @@ public class Client {
                 - List
                 - Join <GameID> <PlayerColor>
                 - Observe <GameID>
+                - Help
                 - Quit
                 """;
     }
@@ -136,6 +138,7 @@ public class Client {
             GameData gameData = new GameData(gameID, null, null, null, null);
             gameData = server.joinGame(auth, gameData, playerColor);
             StringBuilder games = new StringBuilder();
+            System.out.println(gameData.getWhiteUsername());
             games.append(makeGame()).append("\n").append(makeReversedGame()).append("\n");
             return games.toString();
         } else {
