@@ -15,10 +15,7 @@ import server.Server;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ServerFacadeTests {
 
