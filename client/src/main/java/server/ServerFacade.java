@@ -90,7 +90,6 @@ public class ServerFacade {
     }
 
     public GameData joinObserver(AuthData auth, GameData game, String playerColor) throws ResponseException {
-        assert playerColor == null;
         var path = "/game";
         int gameID = game.getGameID();
         Gson gson = new Gson();

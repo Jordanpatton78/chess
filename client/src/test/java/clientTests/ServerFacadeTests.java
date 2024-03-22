@@ -222,7 +222,7 @@ public class ServerFacadeTests {
         GameData game = new GameData(10, "whiteUsername", null, "gameName", null);
         AuthData registeredUser = facade.register(user);
         GameData createdGame = facade.createGame(registeredUser, game);
-        assertThrows(AssertionError.class, () -> {
+        assertThrows(ResponseException.class, () -> {
             GameData joinedGame = facade.joinObserver(registeredUser, game, "WHITE");
         });
     }
