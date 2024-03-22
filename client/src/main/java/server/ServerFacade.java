@@ -22,17 +22,6 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-
-//    public void preLoginHelp() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
-//
-//    public void quit() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
-
     public AuthData login(UserData user) throws ResponseException {
         var path = "/session";
         return this.makeRequest("POST", path, user, null, null, AuthData.class);
@@ -42,59 +31,54 @@ public class ServerFacade {
         var path = "/user";
         return this.makeRequest("POST", path, user, null, null, AuthData.class);
     }
-//
-//    public void postLoginHelp() throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
-//
+
     public AuthData logout(AuthData auth) throws ResponseException {
         var path = "/session";
         String authToken = auth.getAuthToken();
         return this.makeRequest("DELETE", path, auth, authToken, null, AuthData.class);
     }
-//
+
     public GameData createGame(AuthData auth, GameData game) throws ResponseException {
         var path = "/game";
         String authToken = auth.getAuthToken();
         return this.makeRequest("POST", path, game, authToken, null, GameData.class);
     }
-//
-public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
-    var path = "/game";
-    String authToken = auth.getAuthToken();
-    try {
-        URL url = (new URI(serverUrl + path)).toURL();
-        HttpURLConnection http = (HttpURLConnection) url.openConnection();
-        if (authToken != null){
-            http.setRequestProperty("authorization", authToken);
+
+    public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
+        var path = "/game";
+        String authToken = auth.getAuthToken();
+        try {
+            URL url = (new URI(serverUrl + path)).toURL();
+            HttpURLConnection http = (HttpURLConnection) url.openConnection();
+            if (authToken != null){
+                http.setRequestProperty("authorization", authToken);
+            }
+            http.setRequestMethod("GET");
+            http.setDoOutput(true);
+            http.connect();
+
+            // Read response
+            ArrayList<GameData> gamesList = null;
+            int responseCode = http.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                InputStreamReader reader = new InputStreamReader(http.getInputStream());
+
+                // Convert JSON response to HashMap
+                Gson gson = new Gson();
+                Type type = new TypeToken<HashMap<String, ArrayList<GameData>>>() {}.getType();
+                HashMap<String, ArrayList<GameData>> resultMap = gson.fromJson(reader, type);
+
+                // Extract the "games" array
+                gamesList = resultMap.get("games");
+                return gamesList;
+            } else {
+                throw new ResponseException(responseCode, "Error occurred: " + http.getResponseMessage());
+            }
+        } catch (Exception ex) {
+            throw new ResponseException(500, ex.getMessage());
         }
-        http.setRequestMethod("GET");
-        http.setDoOutput(true);
-        http.connect();
-
-        // Read response
-        ArrayList<GameData> gamesList = null;
-        int responseCode = http.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            InputStreamReader reader = new InputStreamReader(http.getInputStream());
-
-            // Convert JSON response to HashMap
-            Gson gson = new Gson();
-            Type type = new TypeToken<HashMap<String, ArrayList<GameData>>>() {}.getType();
-            HashMap<String, ArrayList<GameData>> resultMap = gson.fromJson(reader, type);
-
-            // Extract the "games" array
-            gamesList = resultMap.get("games");
-            return gamesList;
-        } else {
-            throw new ResponseException(responseCode, "Error occurred: " + http.getResponseMessage());
-        }
-    } catch (Exception ex) {
-        throw new ResponseException(500, ex.getMessage());
     }
-}
-//
+
     public GameData joinGame(AuthData auth, GameData game, String playerColor) throws ResponseException {
         var path = "/game";
         int gameID = game.getGameID();
@@ -104,7 +88,7 @@ public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
         return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
     }
-//
+
     public GameData joinObserver(AuthData auth, GameData game, String playerColor) throws ResponseException {
         assert playerColor == null;
         var path = "/game";
@@ -115,22 +99,6 @@ public ArrayList<GameData> listGames(AuthData auth) throws ResponseException {
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
         return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
     }
-
-//    public Pet addPet(Pet pet) throws ResponseException {
-//        var path = "/pet";
-//        return this.makeRequest("POST", path, pet, Pet.class);
-//    }
-//
-//    public void deletePet(int id) throws ResponseException {
-//        var path = String.format("/pet/%s", id);
-//        this.makeRequest("DELETE", path, null, null);
-//    }
-//
-//    public void deleteAllPets() throws ResponseException {
-//        var path = "/pet";
-//        this.makeRequest("DELETE", path, null, null);
-//    }
-//
 
     private <T> T makeRequest(String method, String path, Object request, String auth, String playerColor, Class<T> responseClass) throws ResponseException {
         try {

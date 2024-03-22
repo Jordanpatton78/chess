@@ -37,7 +37,7 @@ public class Client {
                 - Logout
                 - Create <NAME>
                 - List
-                - Join <GameID>
+                - Join <GameID> <PlayerColor>
                 - Observe <GameID>
                 - Quit
                 """;
@@ -55,8 +55,8 @@ public class Client {
                 case "logout" -> logout();
                 case "create" -> createGame(params);
                 case "list" -> listGames();
-//                case "join" -> joinGame(params);
-//                case "observe" -> observeGame(params);
+                case "join" -> joinGame(params);
+                case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 default -> help();
             };
@@ -67,11 +67,11 @@ public class Client {
 
     public String register(String... params) throws ResponseException{
         if (params.length >= 3) {
-            state = State.SIGNEDIN;
             UserData user = new UserData(params[0], params[1], params[2]);
             AuthData auth = server.register(user);
             this.authToken = auth.getAuthToken();
             this.currUser = user.getUsername();
+            state = State.SIGNEDIN;
             return String.format("You signed in as %s.", user.getUsername());
         } else {
             throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD> <EMAIL>");
@@ -80,11 +80,11 @@ public class Client {
 
     public String login(String... params) throws ResponseException{
         if (params.length >= 2) {
-            state = State.SIGNEDIN;
             UserData user = new UserData(params[0], params[1], null);
             AuthData auth = server.login(user);
             this.authToken = auth.getAuthToken();
             this.currUser = user.getUsername();
+            state = State.SIGNEDIN;
             return String.format("You logged in as %s.", user.getUsername());
         } else {
             throw new ResponseException(400, "Expected: <USERNAME> <PASSWORD>");
@@ -128,11 +128,85 @@ public class Client {
         return gameInfo.toString();
     }
 
-
-
-    private void assertSignedIn() throws ResponseException {
-        if (state == State.SIGNEDOUT) {
-            throw new ResponseException(400, "You must sign in");
+    public String joinGame(String... params) throws ResponseException{
+        if (params.length >= 2) {
+            AuthData auth = new AuthData(this.authToken, this.currUser);
+            int gameID = Integer.parseInt(params[0]);
+            String playerColor = params[1];
+            GameData gameData = new GameData(gameID, null, null, null, null);
+            gameData = server.joinGame(auth, gameData, playerColor);
+            StringBuilder games = new StringBuilder();
+            games.append(makeGame()).append("\n").append(makeReversedGame()).append("\n");
+            return games.toString();
+        } else {
+            throw new ResponseException(400, "Expected: <GameID> <playerColor>");
         }
     }
+
+    public String observeGame(String... params) throws ResponseException{
+        if (params.length >= 1) {
+            AuthData auth = new AuthData(this.authToken, this.currUser);
+            int gameID = Integer.parseInt(params[0]);
+            GameData gameData = new GameData(gameID, null, null, null, null);
+            gameData = server.joinObserver(auth, gameData, null);
+            StringBuilder games = new StringBuilder();
+            games.append(makeGame()).append("\n").append(makeReversedGame()).append("\n");
+            return games.toString();
+        } else {
+            throw new ResponseException(400, "Expected: <GameID>");
+        }
+    }
+
+    public String makeGame(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("   a   b   c   d   e   f   g   h\n");
+        sb.append(" --------------------------------\n");
+        char[][] board = {
+                {'r', '|', 'n',  '|', 'b',  '|', 'q',  '|', 'k',  '|', 'b',  '|', 'n',  '|', 'r'},
+                {'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p'},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P'},
+                {'R',  '|', 'N',  '|', 'B',  '|', 'Q',  '|', 'K',  '|', 'B',  '|', 'N',  '|', 'R'}
+        };
+        for (int i = 0; i < 8; i++) {
+            sb.append(8 - i).append("| ");
+            for (int j = 0; j < 15; j++) {
+                sb.append(board[i][j]).append(" ");
+            }
+            sb.append("|").append(8 - i).append("\n");
+        }
+        sb.append(" --------------------------------\n");
+        sb.append("   a   b   c   d   e   f   g   h\n");
+        return sb.toString();
+    }
+
+    public String makeReversedGame(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("   h   g   f   e   d   c   b   a\n");
+        sb.append(" --------------------------------\n");
+        char[][] board = {
+                {'R', '|', 'N',  '|', 'B',  '|', 'Q',  '|', 'K',  '|', 'B',  '|', 'N',  '|', 'R'},
+                {'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P'},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
+                {'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p'},
+                {'r',  '|', 'n',  '|', 'b',  '|', 'q',  '|', 'k',  '|', 'b',  '|', 'n',  '|', 'r'}
+        };
+        for (int i = 0; i < 8; i++) {
+            sb.append(1 + i).append("| ");
+            for (int j = 14; j >= 0; j--) {
+                sb.append(board[i][j]).append(" ");
+            }
+            sb.append("|").append(1 + i).append("\n");
+        }
+        sb.append(" --------------------------------\n");
+        sb.append("   h   g   f   e   d   c   b   a\n");
+        return sb.toString();
+    }
+
 }
