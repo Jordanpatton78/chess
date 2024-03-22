@@ -83,6 +83,7 @@ public class ServerFacade {
         var path = "/game";
         int gameID = game.getGameID();
         Gson gson = new Gson();
+        playerColor = playerColor.toUpperCase();
         String json = "{\"playerColor\":" + playerColor + ",\"gameID\":" + gameID + "}";
         String authToken = auth.getAuthToken();
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
