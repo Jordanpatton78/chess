@@ -10,8 +10,8 @@ import java.util.*;
  */
 public class ChessPiece {
 
-    private PieceType pieceType;
-    private ChessGame.TeamColor teamColor;
+    public PieceType pieceType;
+    public ChessGame.TeamColor teamColor;
     private boolean toBePromoted = false;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {

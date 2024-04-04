@@ -149,9 +149,20 @@ public class Client {
             String playerColor = params[1];
             GameData gameData = new GameData(gameID, null, null, null, null);
             gameData = server.joinGame(auth, gameData, playerColor);
+            ChessGame chessGame = gameData.getGame();
+            ChessBoard board = chessGame.getBoard();
+            if (board == null){
+                board = new ChessBoard();
+                board.resetBoard();
+            }
             StringBuilder games = new StringBuilder();
-            System.out.println(gameData.getWhiteUsername());
-            games.append(makeGame()).append("\n").append(makeReversedGame()).append("\n");
+            if(playerColor.equalsIgnoreCase("white")){
+                games.append(makeWhiteBoard(board)).append("\n");
+            } else if(playerColor.equalsIgnoreCase("black")){
+                games.append(makeBlackBoard(board)).append("\n");
+            } else {
+                games.append(makeWhiteBoard(board)).append("\n");
+            }
             this.currGame = gameData;
             state = State.JOINED;
             return games.toString();
@@ -166,17 +177,127 @@ public class Client {
             int gameID = Integer.parseInt(params[0]);
             GameData gameData = new GameData(gameID, null, null, null, null);
             gameData = server.joinObserver(auth, gameData, null);
+            ChessGame chessGame = gameData.getGame();
+            ChessBoard board = chessGame.getBoard();
+            if (board == null){
+                board = new ChessBoard();
+                board.resetBoard();
+            }
             StringBuilder games = new StringBuilder();
-            games.append(makeGame()).append("\n").append(makeReversedGame()).append("\n");
+            games.append(makeWhiteBoard(board));
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID>");
         }
     }
 
+
+    public String makeWhiteBoard(ChessBoard board){
+        StringBuilder sb = new StringBuilder();
+        sb.append("     1   2   3   4   5   6   7   8\n");
+        sb.append("   --------------------------------\n");
+        for (int i = 8; i >= 1; i--) {
+            sb.append(9 - i);
+            sb.append(" | ");
+            for (int j = 8; j >= 1; j--) {
+                // Append the current cell's value to the string
+                ChessPosition pos = new ChessPosition(i, j);
+                if (board.getPiece(pos) == null){
+                    sb.append(" ");
+                    sb.append(" | ");
+                    continue;
+                }
+                ChessPiece piece = board.pieces.get(pos);
+                if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.WHITE){
+                    sb.append("B");
+                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("K");
+                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("Q");
+                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("R");
+                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("N");
+                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("P");
+                } else if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.BLACK){
+                    sb.append("b");
+                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("k");
+                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("q");
+                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("r");
+                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("n");
+                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("p");
+                }
+                sb.append(" | ");
+            }
+            // Add a newline character after each row
+            sb.append(9 - i);
+            sb.append("\n");
+        }
+        sb.append("   --------------------------------\n");
+        sb.append("     1   2   3   4   5   6   7   8\n");
+        return sb.toString();
+    }
+
+    public String makeBlackBoard(ChessBoard board){
+        StringBuilder sb = new StringBuilder();
+        sb.append("    8   7   6   5   4   3   2   1\n");
+        sb.append("  --------------------------------\n");
+        for (int i = 1; i <= 8; i++) {
+            sb.append(i);
+            sb.append(" | ");
+            for (int j = 1; j <= 8; j++) {
+                // Append the current cell's value to the string
+                ChessPosition pos = new ChessPosition(i, j);
+                if (board.getPiece(pos) == null){
+                    sb.append(" ");
+                    sb.append(" | ");
+                    continue;
+                }
+                ChessPiece piece = board.pieces.get(pos);
+                if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.WHITE){
+                    sb.append("B");
+                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("K");
+                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("Q");
+                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("R");
+                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("N");
+                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("P");
+                } else if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.BLACK){
+                    sb.append("b");
+                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("k");
+                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("q");
+                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("r");
+                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("n");
+                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("p");
+                }
+                sb.append(" | ");
+            }
+            // Add a newline character after each row
+            sb.append(i);
+            sb.append("\n");
+        }
+        sb.append("  --------------------------------\n");
+        sb.append("    8   7   6   5   4   3   2   1\n");
+        return sb.toString();
+    }
     public String makeGame(){
         StringBuilder sb = new StringBuilder();
-        sb.append("   a   b   c   d   e   f   g   h\n");
+        sb.append("   1   2   3   4   5   6   7   8\n");
         sb.append(" --------------------------------\n");
         char[][] board = {
                 {'r', '|', 'n',  '|', 'b',  '|', 'q',  '|', 'k',  '|', 'b',  '|', 'n',  '|', 'r'},
@@ -196,13 +317,13 @@ public class Client {
             sb.append("|").append(8 - i).append("\n");
         }
         sb.append(" --------------------------------\n");
-        sb.append("   a   b   c   d   e   f   g   h\n");
+        sb.append("   1   2   3   4   5   6   7   8\n");
         return sb.toString();
     }
 
     public String makeReversedGame(){
         StringBuilder sb = new StringBuilder();
-        sb.append("   h   g   f   e   d   c   b   a\n");
+        sb.append("   8   7   6  5   4   3   2   1\n");
         sb.append(" --------------------------------\n");
         char[][] board = {
                 {'R', '|', 'N',  '|', 'B',  '|', 'Q',  '|', 'K',  '|', 'B',  '|', 'N',  '|', 'R'},
@@ -222,7 +343,7 @@ public class Client {
             sb.append("|").append(1 + i).append("\n");
         }
         sb.append(" --------------------------------\n");
-        sb.append("   h   g   f   e   d   c   b   a\n");
+        sb.append("   8   7   6   5   4   3   2   1\n");
         return sb.toString();
     }
 
@@ -241,10 +362,17 @@ public class Client {
             ChessBoard board = game.getBoard();
             ChessPosition pos = new ChessPosition(row, col);
             ChessPiece piece = board.getPiece(pos);
-            HashSet<ChessMove> validMoves = piece.pieceMoves(board, pos);
             StringBuilder moves = new StringBuilder();
+            if (piece == null){
+                moves.append("Null piece.");
+                return moves.toString();
+            }
+            HashSet<ChessMove> validMoves = piece.pieceMoves(board, pos);
             for (ChessMove move : validMoves){
-                moves.append(move.getEndPosition());
+                ChessPosition end = move.getEndPosition();
+                int endRow = end.getRow();
+                int endCol = end.getColumn();
+                moves.append(endRow + " ").append(endCol + " ").append("\n");
             }
             return moves.toString();
         } else {
