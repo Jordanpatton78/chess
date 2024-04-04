@@ -1,7 +1,6 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -11,6 +10,7 @@ import client.State;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Objects;
 
 public class Client {
@@ -20,6 +20,8 @@ public class Client {
     private String authToken;
 
     private String currUser;
+
+    private GameData currGame;
 
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -32,6 +34,15 @@ public class Client {
                     - Login <USERNAME> <PASSWORD>
                     - Help
                     - Quit
+                    """;
+        } else if (state == State.JOINED){
+            return """
+                    - Move
+                    - Highlight (Legal Moves) <Piece>
+                    - Redraw
+                    - Leave
+                    - Resign
+                    - Help
                     """;
         }
         return """
@@ -60,6 +71,7 @@ public class Client {
                 case "join" -> joinGame(params);
                 case "observe" -> observeGame(params);
                 case "quit" -> "quit";
+                case "highlight" -> highlightMoves(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -140,6 +152,8 @@ public class Client {
             StringBuilder games = new StringBuilder();
             System.out.println(gameData.getWhiteUsername());
             games.append(makeGame()).append("\n").append(makeReversedGame()).append("\n");
+            this.currGame = gameData;
+            state = State.JOINED;
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID> <playerColor>");
@@ -210,6 +224,32 @@ public class Client {
         sb.append(" --------------------------------\n");
         sb.append("   h   g   f   e   d   c   b   a\n");
         return sb.toString();
+    }
+
+    public String highlightMoves(String ... params) throws ResponseException{
+        if (params.length >= 1) {
+            String pieceString = params[0];
+            String[] pieceStr = pieceString.split(",");
+            int row = Integer.parseInt(pieceStr[0]);
+            int col = Integer.parseInt(pieceStr[1]);
+            ChessGame game = currGame.getGame();
+            if (game.getBoard() == null){
+                ChessBoard board = new ChessBoard();
+                board.resetBoard();
+                game.setBoard(board);
+            }
+            ChessBoard board = game.getBoard();
+            ChessPosition pos = new ChessPosition(row, col);
+            ChessPiece piece = board.getPiece(pos);
+            HashSet<ChessMove> validMoves = piece.pieceMoves(board, pos);
+            StringBuilder moves = new StringBuilder();
+            for (ChessMove move : validMoves){
+                moves.append(move.getEndPosition());
+            }
+            return moves.toString();
+        } else {
+            throw new ResponseException(400, "Expected: <Piece>");
+        }
     }
 
 }
