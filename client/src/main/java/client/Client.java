@@ -197,7 +197,7 @@ public class Client {
         sb.append("     1   2   3   4   5   6   7   8\n");
         sb.append("   --------------------------------\n");
         for (int i = 8; i >= 1; i--) {
-            sb.append(9 - i);
+            sb.append(i);
             sb.append(" | ");
             for (int j = 8; j >= 1; j--) {
                 // Append the current cell's value to the string
@@ -236,7 +236,7 @@ public class Client {
                 sb.append(" | ");
             }
             // Add a newline character after each row
-            sb.append(9 - i);
+            sb.append(i);
             sb.append("\n");
         }
         sb.append("   --------------------------------\n");
@@ -293,57 +293,6 @@ public class Client {
         }
         sb.append("  --------------------------------\n");
         sb.append("    8   7   6   5   4   3   2   1\n");
-        return sb.toString();
-    }
-    public String makeGame(){
-        StringBuilder sb = new StringBuilder();
-        sb.append("   1   2   3   4   5   6   7   8\n");
-        sb.append(" --------------------------------\n");
-        char[][] board = {
-                {'r', '|', 'n',  '|', 'b',  '|', 'q',  '|', 'k',  '|', 'b',  '|', 'n',  '|', 'r'},
-                {'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p'},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P'},
-                {'R',  '|', 'N',  '|', 'B',  '|', 'Q',  '|', 'K',  '|', 'B',  '|', 'N',  '|', 'R'}
-        };
-        for (int i = 0; i < 8; i++) {
-            sb.append(8 - i).append("| ");
-            for (int j = 0; j < 15; j++) {
-                sb.append(board[i][j]).append(" ");
-            }
-            sb.append("|").append(8 - i).append("\n");
-        }
-        sb.append(" --------------------------------\n");
-        sb.append("   1   2   3   4   5   6   7   8\n");
-        return sb.toString();
-    }
-
-    public String makeReversedGame(){
-        StringBuilder sb = new StringBuilder();
-        sb.append("   8   7   6  5   4   3   2   1\n");
-        sb.append(" --------------------------------\n");
-        char[][] board = {
-                {'R', '|', 'N',  '|', 'B',  '|', 'Q',  '|', 'K',  '|', 'B',  '|', 'N',  '|', 'R'},
-                {'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P',  '|', 'P'},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' ',  '|', ' '},
-                {'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p',  '|', 'p'},
-                {'r',  '|', 'n',  '|', 'b',  '|', 'q',  '|', 'k',  '|', 'b',  '|', 'n',  '|', 'r'}
-        };
-        for (int i = 0; i < 8; i++) {
-            sb.append(1 + i).append("| ");
-            for (int j = 14; j >= 0; j--) {
-                sb.append(board[i][j]).append(" ");
-            }
-            sb.append("|").append(1 + i).append("\n");
-        }
-        sb.append(" --------------------------------\n");
-        sb.append("   8   7   6   5   4   3   2   1\n");
         return sb.toString();
     }
 
