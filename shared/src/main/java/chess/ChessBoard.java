@@ -16,7 +16,7 @@ public class ChessBoard {
     public HashMap<ChessPosition, ChessPiece> pieces = new HashMap<>();
 
     public ChessBoard() {
-        // Empty constructor
+        this.resetBoard();
     }
 
     /**
