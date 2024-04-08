@@ -356,7 +356,7 @@ public class MySQLDataAccess implements DataAccess{
                 whiteUsername Varchar(255),
                 blackUsername Varchar(255),
                 gameName Varchar(255),
-                game Varchar(1000)
+                game Varchar(10000)
               )
             """,
             """
