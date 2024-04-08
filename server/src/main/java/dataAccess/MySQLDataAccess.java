@@ -1,5 +1,6 @@
 package dataAccess;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
@@ -228,8 +229,11 @@ public class MySQLDataAccess implements DataAccess{
         }
         var statement = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
         Gson gson = new Gson();
-        var id = executeUpdate(statement, game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), gson.toJson(game.getGame()));
-        return new GameData(game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), game.getGame());
+        ChessGame chessGame = new ChessGame();
+        ChessBoard board = new ChessBoard();
+        chessGame.setBoard(board);
+        var id = executeUpdate(statement, game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), gson.toJson(chessGame));
+        return new GameData(game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), chessGame);
     }
 
     @Override
@@ -352,7 +356,7 @@ public class MySQLDataAccess implements DataAccess{
                 whiteUsername Varchar(255),
                 blackUsername Varchar(255),
                 gameName Varchar(255),
-                game Varchar(255)
+                game Varchar(1000)
               )
             """,
             """
