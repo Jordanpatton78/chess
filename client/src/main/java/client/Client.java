@@ -74,6 +74,7 @@ public class Client {
                 case "observe" -> observeGame(params);
                 case "quit" -> "quit";
                 case "highlight" -> highlightMoves(params);
+                case "redraw" -> redraw();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -351,6 +352,18 @@ public class Client {
         } else {
             throw new ResponseException(400, "Expected: <Piece>");
         }
+    }
+
+    public String redraw(){
+        ChessGame game = currGame.getGame();
+        ChessBoard board = game.getBoard();
+        StringBuilder sb = new StringBuilder();
+        if (this.playerColor == "white"){
+            sb.append(makeWhiteBoard(board));
+        } else {
+            sb.append(makeBlackBoard(board));
+        }
+        return sb.toString();
     }
 
 }
