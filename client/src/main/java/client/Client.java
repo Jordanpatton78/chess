@@ -23,6 +23,8 @@ public class Client {
 
     private GameData currGame;
 
+    private String playerColor;
+
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
     }
@@ -158,8 +160,10 @@ public class Client {
             StringBuilder games = new StringBuilder();
             if(playerColor.equalsIgnoreCase("white")){
                 games.append(makeWhiteBoard(board)).append("\n");
+                this.playerColor = "white";
             } else if(playerColor.equalsIgnoreCase("black")){
                 games.append(makeBlackBoard(board)).append("\n");
+                this.playerColor = "black";
             } else {
                 games.append(makeWhiteBoard(board)).append("\n");
             }
@@ -194,61 +198,9 @@ public class Client {
 
     public String makeWhiteBoard(ChessBoard board){
         StringBuilder sb = new StringBuilder();
-        sb.append("     1   2   3   4   5   6   7   8\n");
-        sb.append("   --------------------------------\n");
-        for (int i = 8; i >= 1; i--) {
-            sb.append(i);
-            sb.append(" | ");
-            for (int j = 8; j >= 1; j--) {
-                // Append the current cell's value to the string
-                ChessPosition pos = new ChessPosition(i, j);
-                if (board.getPiece(pos) == null){
-                    sb.append(" ");
-                    sb.append(" | ");
-                    continue;
-                }
-                ChessPiece piece = board.getPiece(pos);
-                if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.WHITE){
-                    sb.append("B");
-                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.WHITE) {
-                    sb.append("K");
-                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.WHITE) {
-                    sb.append("Q");
-                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.WHITE) {
-                    sb.append("R");
-                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.WHITE) {
-                    sb.append("N");
-                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.WHITE) {
-                    sb.append("P");
-                } else if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.BLACK){
-                    sb.append("b");
-                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.BLACK) {
-                    sb.append("k");
-                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.BLACK) {
-                    sb.append("q");
-                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.BLACK) {
-                    sb.append("r");
-                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.BLACK) {
-                    sb.append("n");
-                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.BLACK) {
-                    sb.append("p");
-                }
-                sb.append(" | ");
-            }
-            // Add a newline character after each row
-            sb.append(i);
-            sb.append("\n");
-        }
-        sb.append("   --------------------------------\n");
-        sb.append("     1   2   3   4   5   6   7   8\n");
-        return sb.toString();
-    }
-
-    public String makeBlackBoard(ChessBoard board){
-        StringBuilder sb = new StringBuilder();
-        sb.append("    8   7   6   5   4   3   2   1\n");
+        sb.append("    1   2   3   4   5   6   7   8\n");
         sb.append("  --------------------------------\n");
-        for (int i = 1; i <= 8; i++) {
+        for (int i = 8; i >= 1; i--) {
             sb.append(i);
             sb.append(" | ");
             for (int j = 1; j <= 8; j++) {
@@ -284,6 +236,62 @@ public class Client {
                     sb.append("n");
                 } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.BLACK) {
                     sb.append("p");
+                } else if (piece.pieceType == null && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("X");
+                }
+                sb.append(" | ");
+            }
+            // Add a newline character after each row
+            sb.append(i);
+            sb.append("\n");
+        }
+        sb.append("  --------------------------------\n");
+        sb.append("    1   2   3   4   5   6   7   8\n");
+        return sb.toString();
+    }
+
+    public String makeBlackBoard(ChessBoard board){
+        StringBuilder sb = new StringBuilder();
+        sb.append("    8   7   6   5   4   3   2   1\n");
+        sb.append("  --------------------------------\n");
+        for (int i = 1; i <= 8; i++) {
+            sb.append(i);
+            sb.append(" | ");
+            for (int j = 8; j >= 1; j--) {
+                // Append the current cell's value to the string
+                ChessPosition pos = new ChessPosition(i, j);
+                if (board.getPiece(pos) == null){
+                    sb.append(" ");
+                    sb.append(" | ");
+                    continue;
+                }
+                ChessPiece piece = board.getPiece(pos);
+                if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.WHITE){
+                    sb.append("B");
+                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("K");
+                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("Q");
+                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("R");
+                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("N");
+                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("P");
+                } else if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.BLACK){
+                    sb.append("b");
+                } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("k");
+                } else if (piece.pieceType == ChessPiece.PieceType.QUEEN && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("q");
+                } else if (piece.pieceType == ChessPiece.PieceType.ROOK && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("r");
+                } else if (piece.pieceType == ChessPiece.PieceType.KNIGHT && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("n");
+                } else if (piece.pieceType == ChessPiece.PieceType.PAWN && piece.teamColor == ChessGame.TeamColor.BLACK) {
+                    sb.append("p");
+                } else if (piece.pieceType == null && piece.teamColor == ChessGame.TeamColor.WHITE) {
+                    sb.append("X");
                 }
                 sb.append(" | ");
             }
@@ -321,7 +329,23 @@ public class Client {
                 ChessPosition end = move.getEndPosition();
                 int endRow = end.getRow();
                 int endCol = end.getColumn();
-                moves.append(endRow + " ").append(endCol + " ").append("\n");
+                board.squares[endRow-1][endCol-1] = new ChessPiece(ChessGame.TeamColor.WHITE, null);
+            }
+            if (this.playerColor == "white"){
+                moves.append(makeWhiteBoard(board));
+            } else if (this.playerColor == "black"){
+                moves.append(makeBlackBoard(board));
+            }
+            for (int i=0; i<board.squares.length;i++){
+                for (int j=0; j<board.squares[i].length;j++){
+                    ChessPosition chessPosition = new ChessPosition(i+1,j+1);
+                    ChessPiece chessPiece = board.getPiece(chessPosition);
+                    if (chessPiece != null){
+                        if (chessPiece.teamColor == ChessGame.TeamColor.WHITE && chessPiece.pieceType == null){
+                            board.removePiece(chessPosition);
+                        }
+                    }
+                }
             }
             return moves.toString();
         } else {
