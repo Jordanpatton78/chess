@@ -121,19 +121,37 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = getKingPosition(board, teamColor);
 
-        for (ChessPosition key : board.pieces.keySet()) {
-            ChessPiece piece = board.pieces.get(key);
+//        for (ChessPosition key : board.pieces.keySet()) {
+//            ChessPiece piece = board.pieces.get(key);
+//
+//            if (piece.getTeamColor() != teamColor) {
+//                HashSet<ChessMove> moves = piece.pieceMoves(board, key);
+//
+//                for (ChessMove move : moves) {
+//                    ChessPosition endPosition = move.getEndPosition();
+//
+//                    if (endPosition.equals(kingPosition)) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
 
-            if (piece.getTeamColor() != teamColor) {
-                HashSet<ChessMove> moves = piece.pieceMoves(board, key);
+        for (int i=1; i<=board.squares.length; i++){
+            for (int j=1; j<=board.squares[i].length; j++){
+                ChessPosition pos = new ChessPosition(i,j);
+                ChessPiece piece = board.getPiece(pos);
+                if (piece.getTeamColor() != teamColor) {
+                    HashSet<ChessMove> moves = piece.pieceMoves(board, pos);
 
-                for (ChessMove move : moves) {
-                    ChessPosition endPosition = move.getEndPosition();
+                    for (ChessMove move : moves) {
+                        ChessPosition endPosition = move.getEndPosition();
 
-                    if (endPosition.equals(kingPosition)) {
-                        return true;
+                        if (endPosition.equals(kingPosition)) {
+                            return true;
+                        }
                     }
-                }
+            }
             }
         }
 
@@ -142,7 +160,7 @@ public class ChessGame {
 
     public boolean isInCheckmate(TeamColor teamColor) {
         ChessPosition kingPosition = getKingPosition(board, teamColor);
-        ChessPiece king = board.pieces.get(kingPosition);
+        ChessPiece king = board.getPiece(kingPosition);
         HashSet<ChessMove> kingMoves = king.pieceMoves(board, kingPosition);
         HashSet<ChessMove> newKingMoves = simulateMoves(kingMoves, teamColor);
 
@@ -151,7 +169,8 @@ public class ChessGame {
 
     public boolean isInStalemate(TeamColor teamColor) {
         ChessPosition kingPosition = getKingPosition(board, teamColor);
-        ChessPiece king = board.pieces.get(kingPosition);
+//        ChessPiece king = board.pieces.get(kingPosition);
+        ChessPiece king = board.getPiece(kingPosition);
         HashSet<ChessMove> kingMoves = king.pieceMoves(board, kingPosition);
         HashSet<ChessMove> newKingMoves = simulateMoves(kingMoves, teamColor);
 
@@ -159,11 +178,22 @@ public class ChessGame {
     }
 
     public ChessPosition getKingPosition(ChessBoard board, TeamColor teamColor) {
-        for (ChessPosition key : board.pieces.keySet()) {
-            ChessPiece piece = board.pieces.get(key);
+//        for (ChessPosition key : board.pieces.keySet()) {
+//            ChessPiece piece = board.pieces.get(key);
+//
+//            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+//                return key;
+//            }
+//        }
 
-            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
-                return key;
+        for (int i=1; i<=board.squares.length; i++){
+            for (int j=1; j<=board.squares[i].length; j++){
+                ChessPosition pos = new ChessPosition(i,j);
+                ChessPiece piece = board.getPiece(pos);
+
+                if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                    return pos;
+                }
             }
         }
 

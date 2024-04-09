@@ -207,7 +207,7 @@ public class Client {
                     sb.append(" | ");
                     continue;
                 }
-                ChessPiece piece = board.pieces.get(pos);
+                ChessPiece piece = board.getPiece(pos);
                 if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.WHITE){
                     sb.append("B");
                 } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.WHITE) {
@@ -259,7 +259,7 @@ public class Client {
                     sb.append(" | ");
                     continue;
                 }
-                ChessPiece piece = board.pieces.get(pos);
+                ChessPiece piece = board.getPiece(pos);
                 if (piece.pieceType == ChessPiece.PieceType.BISHOP && piece.teamColor == ChessGame.TeamColor.WHITE){
                     sb.append("B");
                 } else if (piece.pieceType == ChessPiece.PieceType.KING && piece.teamColor == ChessGame.TeamColor.WHITE) {

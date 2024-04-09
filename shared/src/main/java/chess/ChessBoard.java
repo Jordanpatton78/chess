@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public class ChessBoard {
 
-    private ChessPiece[][] squares = new ChessPiece[8][8];
-    public HashMap<ChessPosition, ChessPiece> pieces = new HashMap<>();
+    public ChessPiece[][] squares = new ChessPiece[8][8];
+//    public HashMap<ChessPosition, ChessPiece> pieces = new HashMap<>();
 
     public ChessBoard() {
         this.resetBoard();
@@ -27,7 +27,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
-        pieces.put(position, piece);
+//        pieces.put(position, piece);
     }
 
     /**
@@ -46,7 +46,7 @@ public class ChessBoard {
 
     public void removePiece(ChessPosition position) {
         squares[position.getRow() - 1][position.getColumn() - 1] = null;
-        pieces.remove(position);
+//        pieces.remove(position);
     }
 
     /**
