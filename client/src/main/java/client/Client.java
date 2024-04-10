@@ -41,7 +41,7 @@ public class Client {
                     """;
         } else if (state == State.JOINED){
             return """
-                    - Move
+                    - Move <Start Location> <End Location>
                     - Highlight (Legal Moves) <Piece>
                     - Redraw
                     - Leave
@@ -78,9 +78,10 @@ public class Client {
                 case "highlight" -> highlightMoves(params);
                 case "redraw" -> redraw();
                 case "leave" -> leave();
+                case "move" -> move(params);
                 default -> help();
             };
-        } catch (ResponseException ex) {
+        } catch (Exception ex) {
             return ex.getMessage();
         }
     }
@@ -193,6 +194,8 @@ public class Client {
             }
             StringBuilder games = new StringBuilder();
             games.append(makeWhiteBoard(board));
+            this.currGame = gameData;
+            state = State.JOINED;
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID>");
@@ -380,6 +383,31 @@ public class Client {
         server.leaveGame(new AuthData(this.authToken, this.currUser), game);
         this.currGame = null;
         return "You left the game.";
+    }
+
+    public String move(String... params) throws ResponseException, InvalidMoveException {
+        if (params.length >= 1) {
+            String startStr = params[0];
+            String endStr = params[1];
+            int startRow = Integer.parseInt(startStr.split(",")[0]);
+            int startCol = Integer.parseInt(startStr.split(",")[1]);
+            int endRow = Integer.parseInt(endStr.split(",")[0]);
+            int endCol = Integer.parseInt(endStr.split(",")[1]);
+            ChessPosition startPos = new ChessPosition(startRow, startCol);
+            ChessPosition endPos = new ChessPosition(endRow, endCol);
+            ChessMove move = new ChessMove(startPos, endPos, null);
+            ChessGame game = currGame.getGame();
+            ChessBoard board = game.getBoard();
+            ChessPiece piece = board.getPiece(startPos);
+            game.makeMove(move);
+            if (playerColor == "white"){
+                return makeWhiteBoard(board);
+            } else {
+                return makeBlackBoard(board);
+            }
+        } else {
+            throw new ResponseException(400, "Expected: <Start Location> <End Location>");
+        }
     }
 
 }

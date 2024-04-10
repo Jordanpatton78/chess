@@ -137,21 +137,23 @@ public class ChessGame {
 //            }
 //        }
 
-        for (int i=1; i<=board.squares.length; i++){
-            for (int j=1; j<=board.squares[i].length; j++){
-                ChessPosition pos = new ChessPosition(i,j);
+        for (int i=0; i<board.squares.length; i++){
+            for (int j=0; j<board.squares[i].length; j++){
+                ChessPosition pos = new ChessPosition(i+1,j+1);
                 ChessPiece piece = board.getPiece(pos);
-                if (piece.getTeamColor() != teamColor) {
-                    HashSet<ChessMove> moves = piece.pieceMoves(board, pos);
+                if (piece != null){
+                    if (piece.getTeamColor() != teamColor) {
+                        HashSet<ChessMove> moves = piece.pieceMoves(board, pos);
 
-                    for (ChessMove move : moves) {
-                        ChessPosition endPosition = move.getEndPosition();
+                        for (ChessMove move : moves) {
+                            ChessPosition endPosition = move.getEndPosition();
 
-                        if (endPosition.equals(kingPosition)) {
-                            return true;
+                            if (endPosition.equals(kingPosition)) {
+                                return true;
+                            }
                         }
                     }
-            }
+                }
             }
         }
 
@@ -186,13 +188,15 @@ public class ChessGame {
 //            }
 //        }
 
-        for (int i=1; i<=board.squares.length; i++){
-            for (int j=1; j<=board.squares[i].length; j++){
-                ChessPosition pos = new ChessPosition(i,j);
+        for (int i=0; i<board.squares.length; i++){
+            for (int j=0; j<board.squares[i].length; j++){
+                ChessPosition pos = new ChessPosition(i+1,j+1);
                 ChessPiece piece = board.getPiece(pos);
 
-                if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
-                    return pos;
+                if (piece != null){
+                    if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
+                        return pos;
+                    }
                 }
             }
         }
