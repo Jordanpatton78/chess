@@ -100,6 +100,12 @@ public class ServerFacade {
         return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
     }
 
+    public GameData leaveGame(AuthData auth, GameData game) throws ResponseException {
+        var path = "/leave";
+        String authToken = auth.getAuthToken();
+        return this.makeRequest("POST", path, game, authToken, null, GameData.class);
+    }
+
     private <T> T makeRequest(String method, String path, Object request, String auth, String playerColor, Class<T> responseClass) throws ResponseException {
         try {
             URL url = (new URI(serverUrl + path)).toURL();

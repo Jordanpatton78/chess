@@ -30,5 +30,7 @@ public interface DataAccess {
 
     public GameData updateGame(GameData game) throws DataAccessException;
 
+    public GameData leaveGame(GameData game) throws DataAccessException;
+
     public void deleteAll() throws DataAccessException;
 }

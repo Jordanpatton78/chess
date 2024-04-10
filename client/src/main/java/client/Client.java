@@ -25,6 +25,8 @@ public class Client {
 
     private String playerColor;
 
+    private int gameID;
+
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
     }
@@ -75,6 +77,7 @@ public class Client {
                 case "quit" -> "quit";
                 case "highlight" -> highlightMoves(params);
                 case "redraw" -> redraw();
+                case "leave" -> leave();
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -364,6 +367,19 @@ public class Client {
             sb.append(makeBlackBoard(board));
         }
         return sb.toString();
+    }
+
+    public String leave() throws ResponseException{
+        state = State.SIGNEDIN;
+        GameData game = null;
+        if (this.playerColor == "white"){
+            game = new GameData(currGame.getGameID(), null, currGame.getBlackUsername(), currGame.getGameName(), currGame.getGame());
+        } else {
+            game = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), null, currGame.getGameName(), currGame.getGame());
+        }
+        server.leaveGame(new AuthData(this.authToken, this.currUser), game);
+        this.currGame = null;
+        return "You left the game.";
     }
 
 }

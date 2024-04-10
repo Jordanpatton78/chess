@@ -308,6 +308,22 @@ public class MySQLDataAccess implements DataAccess{
         }
     }
 
+    @Override
+    public GameData leaveGame(GameData game) throws DataAccessException {
+        // Then if the username doesn't exist we'll add the data to the db
+        int gameID = game.getGameID();
+        String whiteUser = game.getWhiteUsername();
+        String blackUser = game.getBlackUsername();
+        String gameName = game.getGameName();
+        ChessGame chessGame = game.getGame();
+        var statement1 = "DELETE FROM game WHERE gameID = ?";
+        var id = executeUpdate(statement1, gameID);
+        Gson gson = new Gson();
+        var statement2 = "INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?, ?, ?, ?, ?)";
+        var id2 = executeUpdate(statement2, game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), gson.toJson(chessGame));
+        return new GameData(game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getGameName(), chessGame);
+    }
+
 
     @Override
     public void deleteAll() throws DataAccessException {

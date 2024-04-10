@@ -4,6 +4,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -77,6 +78,11 @@ public class MemoryDataAccess implements DataAccess{
     public GameData updateGame(GameData game) throws DataAccessException{
         int gameId = game.getGameID();
         gameMap.put(gameId, game);
+        return game;
+    }
+
+    @Override
+    public GameData leaveGame(GameData game) throws DataAccessException{
         return game;
     }
 

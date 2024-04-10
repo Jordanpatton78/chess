@@ -84,6 +84,10 @@ public class Service {
         return dataAccess.updateGame(newGame);
     }
 
+    public GameData leaveGame(GameData game) throws DataAccessException{
+        return dataAccess.leaveGame(game);
+    }
+
     public void deleteAll() throws DataAccessException {
         dataAccess.deleteAll();
     }

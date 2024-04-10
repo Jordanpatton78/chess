@@ -49,6 +49,7 @@ public class Server {
         Spark.get("/game", this::listGames);
         Spark.post("/game", this::createGame);
         Spark.put("/game", this::joinGame);
+        Spark.post("/leave", this::leave);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -197,6 +198,22 @@ public class Server {
         }
         GameData updatedGame = service.updateGame(username, gameData, playerColor);
         Object result = new Gson().toJson(updatedGame);
+        return result;
+    }
+
+    private Object leave(Request req, Response res) throws DataAccessException{
+        String authToken = req.headers("authorization");
+        var game = new Gson().fromJson(req.body(), GameData.class);
+        AuthData auth = new AuthData(authToken, "");
+        AuthData authCheck = service.getAuth(auth);
+        if (authCheck.getAuthToken().equals("401")){
+            res.status(401);
+            res.type("application/json");
+            ErrorData error = new ErrorData("Error: Unauthorized");
+            return new Gson().toJson(error);
+        }
+        GameData leftGame = service.leaveGame(game);
+        Object result = new Gson().toJson(leftGame);
         return result;
     }
 
