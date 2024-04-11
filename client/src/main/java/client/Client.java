@@ -1,12 +1,15 @@
 package client;
 
 import chess.*;
+import client.websocket.NotificationHandler;
+import client.websocket.WebSocketFacade;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import server.ServerFacade;
 import client.State;
+import webSocketMessages.serverMessages.ServerMessage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,8 +30,19 @@ public class Client {
 
     private int gameID;
 
+    private String serverUrl;
+
+    public NotificationHandler notificationHandler;
+
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
+        this.serverUrl = serverUrl;
+        this.notificationHandler = new NotificationHandler() {
+            @Override
+            public void notify(ServerMessage serverMessage) {
+                System.out.println(serverMessage.getMessage());
+            }
+        };
     }
 
     public String help() {
@@ -174,6 +188,8 @@ public class Client {
             }
             this.currGame = gameData;
             state = State.JOINED;
+            WebSocketFacade webSocketFacade = new WebSocketFacade(this.serverUrl, notificationHandler);
+            webSocketFacade.joinGame(this.authToken, this.currUser);
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID> <playerColor>");

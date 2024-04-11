@@ -12,6 +12,7 @@ import model.AuthData;
 import model.ErrorData;
 import model.GameData;
 import model.UserData;
+import server.websocket.WebSocketHandler;
 import service.Service;
 import spark.*;
 
@@ -25,6 +26,8 @@ public class Server {
     private final Service service;
     DataAccess dataAccess;
 
+    WebSocketHandler webSocketHandler;
+
     {
         try {
             dataAccess = new MySQLDataAccess();
@@ -35,11 +38,14 @@ public class Server {
 
     public Server() {
         service = new Service(dataAccess);
+        webSocketHandler = new WebSocketHandler();
     }
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/connect", webSocketHandler);
 
         // Register your endpoints and handle exceptions here.
         Spark.post("/user", this::register);

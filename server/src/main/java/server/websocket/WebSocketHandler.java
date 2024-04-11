@@ -13,31 +13,31 @@ import java.io.IOException;
 import java.util.Timer;
 
 
-//@WebSocket
-//public class WebSocketHandler {
-//
-//    private final ConnectionManager connections = new ConnectionManager();
-//
-//    @OnWebSocketMessage
-//    public void onMessage(Session session, String message) throws IOException {
-//        UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
-//        switch (action.type()) {
-//            case JOIN_PLAYER -> enter(action.visitorName(), session);
+@WebSocket
+public class WebSocketHandler {
+
+    private final ConnectionManager connections = new ConnectionManager();
+
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws IOException {
+        UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
+        switch (action.getCommandType()) {
+            case JOIN_PLAYER -> joinPlayer(action.getUsername(), session);
 //            case EXIT -> exit(action.visitorName());
-//        }
-//    }
-//
-//    private void enter(String visitorName, Session session) throws IOException {
-//        connections.add(visitorName, session);
-//        var message = String.format("%s is in the shop", visitorName);
-//        var serverMessage = new ServerMessage(ServerMessage.Type.ARRIVAL, message);
-//        connections.broadcast(visitorName, serverMessage);
-//    }
-//
+        }
+    }
+
+    private void joinPlayer(String visitorName, Session session) throws IOException {
+        connections.add(visitorName, session);
+        var message = String.format("%s just joined the game as a player.", visitorName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(visitorName, serverMessage);
+    }
+
 //    private void exit(String visitorName) throws IOException {
 //        connections.remove(visitorName);
 //        var message = String.format("%s left the shop", visitorName);
-//        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.Type.DEPARTURE, message);
+//        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType, message);
 //        connections.broadcast(visitorName, serverMessage);
 //    }
 //
@@ -50,4 +50,4 @@ import java.util.Timer;
 //            throw new ResponseException(500, ex.getMessage());
 //        }
 //    }
-//}
+}
