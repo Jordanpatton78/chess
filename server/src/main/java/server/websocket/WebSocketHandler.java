@@ -45,6 +45,7 @@ public class WebSocketHandler {
         UserGameCommand action = new Gson().fromJson(message, UserGameCommand.class);
         switch (action.getCommandType()) {
             case JOIN_PLAYER -> joinPlayer(action.getUsername(), session, action.getGameID());
+            case JOIN_OBSERVER -> joinObserver(action.getUsername(), session, action.getGameID());
 //            case EXIT -> exit(action.visitorName());
         }
     }
@@ -96,6 +97,47 @@ public class WebSocketHandler {
         var gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameMessage);
         connections.broadcastToSender(visitorName, gameServerMessage);
         var message = String.format("%s just joined the game as a player.", visitorName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(visitorName, serverMessage);
+    }
+
+    private void joinObserver(String visitorName, Session session, int gameID) throws IOException, DataAccessException {
+        connections.add(visitorName, session);
+        GameData gameToReturn = null;
+        String playerColor = "white";
+        String query = "SELECT * FROM game WHERE gameID = ?";
+        try (Connection connection = DatabaseManager.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            // Set the parameter for the prepared statement
+            preparedStatement.setInt(1, gameID);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                // Check if there are any results
+                if (resultSet.next()) {
+                    // Game already exists
+                    int gameIDToReturn = resultSet.getInt("gameID");
+                    String whiteUser = resultSet.getString("whiteUsername");
+                    String blackUser = resultSet.getString("blackUsername");
+                    String gameName = resultSet.getString("gameName");
+                    String chessGameString = resultSet.getString("game");
+                    Gson gson = new Gson();
+                    ChessGame chessGame = gson.fromJson(chessGameString, ChessGame.class);
+                    gameToReturn = new GameData(gameIDToReturn, whiteUser, blackUser, gameName, chessGame);
+                } else {
+                    // Game doesn't exist
+                    GameData error = new GameData(400, "", "", "", new ChessGame());
+                }
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+        ChessGame game = gameToReturn.getGame();
+        ChessBoard board = game.getBoard();
+        String gameMessage = makeWhiteBoard(board);
+        var gameServerMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameMessage);
+        connections.broadcastToSender(visitorName, gameServerMessage);
+        var message = String.format("%s just joined the game as an observer.", visitorName);
         var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(visitorName, serverMessage);
     }

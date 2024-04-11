@@ -212,6 +212,8 @@ public class Client {
 //            games.append(makeWhiteBoard(board));
             this.currGame = gameData;
             state = State.JOINED;
+            WebSocketFacade webSocketFacade = new WebSocketFacade(this.serverUrl, notificationHandler);
+            webSocketFacade.observeGame(this.authToken, this.currUser, gameID);
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID>");
