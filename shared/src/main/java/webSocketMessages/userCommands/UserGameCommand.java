@@ -10,10 +10,11 @@ import java.util.Objects;
  */
 public class UserGameCommand {
 
-    public UserGameCommand(CommandType command, String authToken, String username) {
+    public UserGameCommand(CommandType command, String authToken, String username, int gameID) {
         this.authToken = authToken;
         this.username = username;
         this.commandType = command;
+        this.gameID = gameID;
     }
 
     public enum CommandType {
@@ -30,6 +31,8 @@ public class UserGameCommand {
 
     private final String username;
 
+    private final int gameID;
+
     public String getAuthString() {
         return authToken;
     }
@@ -40,6 +43,10 @@ public class UserGameCommand {
 
     public String getUsername(){
         return this.username;
+    }
+
+    public int getGameID(){
+        return this.gameID;
     }
 
     @Override

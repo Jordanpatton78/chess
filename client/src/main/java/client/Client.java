@@ -177,19 +177,19 @@ public class Client {
                 board.resetBoard();
             }
             StringBuilder games = new StringBuilder();
-            if(playerColor.equalsIgnoreCase("white")){
-                games.append(makeWhiteBoard(board)).append("\n");
-                this.playerColor = "white";
-            } else if(playerColor.equalsIgnoreCase("black")){
-                games.append(makeBlackBoard(board)).append("\n");
-                this.playerColor = "black";
-            } else {
-                games.append(makeWhiteBoard(board)).append("\n");
-            }
+//            if(playerColor.equalsIgnoreCase("white")){
+//                games.append(makeWhiteBoard(board)).append("\n");
+//                this.playerColor = "white";
+//            } else if(playerColor.equalsIgnoreCase("black")){
+//                games.append(makeBlackBoard(board)).append("\n");
+//                this.playerColor = "black";
+//            } else {
+//                games.append(makeWhiteBoard(board)).append("\n");
+//            }
             this.currGame = gameData;
             state = State.JOINED;
             WebSocketFacade webSocketFacade = new WebSocketFacade(this.serverUrl, notificationHandler);
-            webSocketFacade.joinGame(this.authToken, this.currUser);
+            webSocketFacade.joinGame(this.authToken, this.currUser, gameID);
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID> <playerColor>");
@@ -209,7 +209,7 @@ public class Client {
                 board.resetBoard();
             }
             StringBuilder games = new StringBuilder();
-            games.append(makeWhiteBoard(board));
+//            games.append(makeWhiteBoard(board));
             this.currGame = gameData;
             state = State.JOINED;
             return games.toString();

@@ -19,6 +19,16 @@ public class ConnectionManager {
         connections.remove(visitorName);
     }
 
+    public void broadcastToSender(String senderName, ServerMessage serverMessage) throws IOException {
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if (c.visitorName.equals(senderName)) {
+                    c.send(serverMessage.toString());
+                }
+            }
+        }
+    }
+
     public void broadcast(String excludeVisitorName, ServerMessage serverMessage) throws IOException {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
