@@ -26,7 +26,7 @@ public class Client {
 
     private GameData currGame;
 
-    private String playerColor;
+    public String playerColor;
 
     private int gameID;
 
@@ -42,7 +42,17 @@ public class Client {
         this.notificationHandler = new NotificationHandler() {
             @Override
             public void notify(ServerMessage serverMessage) {
-                System.out.println(serverMessage.getMessage());
+                String message = serverMessage.getMessage();
+                if (determineMessageType(message) == ServerMessage.ServerMessageType.LOAD_GAME){
+                    if (playerColor.equals(determineOrientation(message))){
+                        System.out.println(message);
+                    } else{
+                        message = flipChessboard(message);
+                        System.out.println(message);
+                    }
+                }else {
+                    System.out.println(message);
+                }
             }
         };
 
@@ -178,6 +188,7 @@ public class Client {
             AuthData auth = new AuthData(this.authToken, this.currUser);
             int gameID = Integer.parseInt(params[0]);
             String playerColor = params[1];
+            this.playerColor = playerColor;
             GameData gameData = new GameData(gameID, null, null, null, null);
             gameData = server.joinGame(auth, gameData, playerColor);
             ChessGame chessGame = gameData.getGame();
@@ -339,24 +350,65 @@ public class Client {
 
     public static String flipChessboard(String board) {
         // Split the board into rows
-        String[] rows = board.trim().split("\n");
+        String[] rows = board.split("\n");
 
-        // Remove the first and last rows (headers)
-        StringBuilder flippedBoard = new StringBuilder("  --------------------------------\n");
-        for (int i = rows.length - 2; i > 0; i--) {
-            String row = rows[i];
-            // Split the row into pieces
-            String[] pieces = row.trim().split("\\|");
-            StringBuilder flippedRow = new StringBuilder();
-            for (int j = pieces.length - 2; j > 0; j--) {
-                flippedRow.append(pieces[j].trim()).append(" | ");
+        // Initialize a StringBuilder to store the flipped board
+        StringBuilder flippedBoard = new StringBuilder();
+
+        for (int i = rows.length-1; i >=0; i --){
+            rows[i] = flipString(rows[i]);
+            if (i == 0 || i == 1 || i == rows.length-2 || i == rows.length-1){
+                rows[i] = "    " + rows[i];
             }
-            // Append the flipped row to the flipped board
-            flippedBoard.append(flippedRow.toString().trim()).append("\n");
+            flippedBoard.append(rows[i]);
+            flippedBoard.append("\n");
         }
-        flippedBoard.append("  --------------------------------\n");
-
         return flippedBoard.toString();
+    }
+
+    public static String flipString(String originalString) {
+        // Split the original string by spaces
+        String[] numbers = originalString.split(" ");
+
+        // Initialize a StringBuilder to store the flipped string
+        StringBuilder flippedStringBuilder = new StringBuilder();
+
+        // Iterate over the numbers in reverse order and append them to the StringBuilder
+        for (int i = numbers.length - 1; i >= 0; i--) {
+            flippedStringBuilder.append(numbers[i]);
+            if (i > 0) {
+                flippedStringBuilder.append(" "); // Append a space between numbers, except for the last one
+            }
+        }
+
+        // Convert the StringBuilder to a string and return
+        return flippedStringBuilder.toString();
+    }
+
+    public static String determineOrientation(String chessboard) {
+        // Split the chessboard string into lines
+        String chessboardCopy = new String(chessboard);
+        String[] lines = chessboardCopy.trim().split("\n");
+
+        // Check if the first line starts with "8 |"
+        if (lines[0].startsWith("8")) {
+            return "black";
+        } else {
+            return "white";
+        }
+    }
+
+    public static ServerMessage.ServerMessageType determineMessageType(String message) {
+        // Split the chessboard string into lines
+        String messageCopy = new String(message);
+        String[] lines = messageCopy.trim().split("\n");
+
+        // Check if the first line starts with "8 |"
+        if (lines[0].startsWith("8")||lines[0].startsWith("1")) {
+            return ServerMessage.ServerMessageType.LOAD_GAME;
+        } else {
+            return ServerMessage.ServerMessageType.NOTIFICATION;
+        }
     }
 
     public String highlightMoves(String ... params) throws ResponseException{
@@ -387,9 +439,9 @@ public class Client {
                 int endCol = end.getColumn();
                 board.squares[endRow-1][endCol-1] = new ChessPiece(ChessGame.TeamColor.WHITE, null);
             }
-            if (this.playerColor == "white"){
+            if (this.playerColor.equals("white")){
                 moves.append(makeWhiteBoard(board));
-            } else if (this.playerColor == "black"){
+            } else if (this.playerColor.equals("black")){
                 moves.append(makeBlackBoard(board));
             }
             for (int i=0; i<board.squares.length;i++){
