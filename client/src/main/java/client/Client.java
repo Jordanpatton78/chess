@@ -34,6 +34,8 @@ public class Client {
 
     public NotificationHandler notificationHandler;
 
+    public WebSocketFacade webSocketFacade;
+
     public Client(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
@@ -43,6 +45,14 @@ public class Client {
                 System.out.println(serverMessage.getMessage());
             }
         };
+
+        {
+            try{
+                this.webSocketFacade = new WebSocketFacade(serverUrl, notificationHandler);
+            } catch (ResponseException e ){
+
+            }
+        }
     }
 
     public String help() {
@@ -188,8 +198,7 @@ public class Client {
 //            }
             this.currGame = gameData;
             state = State.JOINED;
-            WebSocketFacade webSocketFacade = new WebSocketFacade(this.serverUrl, notificationHandler);
-            webSocketFacade.joinGame(this.authToken, this.currUser, gameID);
+            this.webSocketFacade.joinGame(this.authToken, this.currUser, gameID);
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID> <playerColor>");
@@ -212,8 +221,7 @@ public class Client {
 //            games.append(makeWhiteBoard(board));
             this.currGame = gameData;
             state = State.JOINED;
-            WebSocketFacade webSocketFacade = new WebSocketFacade(this.serverUrl, notificationHandler);
-            webSocketFacade.observeGame(this.authToken, this.currUser, gameID);
+            this.webSocketFacade.observeGame(this.authToken, this.currUser, gameID);
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID>");
@@ -329,7 +337,30 @@ public class Client {
         return sb.toString();
     }
 
+    public static String flipChessboard(String board) {
+        // Split the board into rows
+        String[] rows = board.trim().split("\n");
+
+        // Remove the first and last rows (headers)
+        StringBuilder flippedBoard = new StringBuilder("  --------------------------------\n");
+        for (int i = rows.length - 2; i > 0; i--) {
+            String row = rows[i];
+            // Split the row into pieces
+            String[] pieces = row.trim().split("\\|");
+            StringBuilder flippedRow = new StringBuilder();
+            for (int j = pieces.length - 2; j > 0; j--) {
+                flippedRow.append(pieces[j].trim()).append(" | ");
+            }
+            // Append the flipped row to the flipped board
+            flippedBoard.append(flippedRow.toString().trim()).append("\n");
+        }
+        flippedBoard.append("  --------------------------------\n");
+
+        return flippedBoard.toString();
+    }
+
     public String highlightMoves(String ... params) throws ResponseException{
+        this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
         if (params.length >= 1) {
             String pieceString = params[0];
             String[] pieceStr = pieceString.split(",");
@@ -378,7 +409,8 @@ public class Client {
         }
     }
 
-    public String redraw(){
+    public String redraw()throws ResponseException {
+        this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
         ChessGame game = currGame.getGame();
         ChessBoard board = game.getBoard();
         StringBuilder sb = new StringBuilder();
@@ -404,6 +436,7 @@ public class Client {
     }
 
     public String move(String... params) throws ResponseException, InvalidMoveException {
+        this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
         if (params.length >= 1) {
             String startStr = params[0];
             String endStr = params[1];
@@ -418,14 +451,18 @@ public class Client {
             ChessBoard board = game.getBoard();
             ChessPiece piece = board.getPiece(startPos);
             game.makeMove(move);
-            if (playerColor == "white"){
-                return makeWhiteBoard(board);
-            } else {
-                return makeBlackBoard(board);
-            }
+            GameData newGame = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), currGame.getBlackUsername(), currGame.getGameName(), game);
+            this.currGame = server.move(new AuthData(this.authToken, this.currUser), newGame);
+            this.webSocketFacade.makeMove(this.authToken, this.currUser, currGame.getGameID());
+//            if (playerColor == "white"){
+//                return makeWhiteBoard(board);
+//            } else {
+//                return makeBlackBoard(board);
+//            }
         } else {
             throw new ResponseException(400, "Expected: <Start Location> <End Location>");
         }
+        return "";
     }
 
 }

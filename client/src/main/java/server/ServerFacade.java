@@ -100,8 +100,20 @@ public class ServerFacade {
         return this.makeRequest("PUT", path, jsonObject, authToken, playerColor, GameData.class);
     }
 
+    public GameData getGame(AuthData auth, GameData game) throws ResponseException{
+        var path = "/getgame";
+        String authToken = auth.getAuthToken();
+        return this.makeRequest("POST", path, game, authToken, null, GameData.class);
+    }
+
     public GameData leaveGame(AuthData auth, GameData game) throws ResponseException {
         var path = "/leave";
+        String authToken = auth.getAuthToken();
+        return this.makeRequest("POST", path, game, authToken, null, GameData.class);
+    }
+
+    public GameData move(AuthData auth, GameData game) throws ResponseException {
+        var path = "/move";
         String authToken = auth.getAuthToken();
         return this.makeRequest("POST", path, game, authToken, null, GameData.class);
     }

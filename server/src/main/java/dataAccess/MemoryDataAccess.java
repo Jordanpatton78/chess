@@ -87,6 +87,11 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
+    public GameData move(GameData game) throws DataAccessException{
+        return game;
+    }
+
+    @Override
     public void deleteAll() throws DataAccessException {
         userMap.clear();
         authMap.clear();
