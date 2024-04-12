@@ -316,21 +316,4 @@ public class WebSocketHandler {
         sb.append("    8   7   6   5   4   3   2   1\n");
         return sb.toString();
     }
-
-//    private void exit(String visitorName) throws IOException {
-//        connections.remove(visitorName);
-//        var message = String.format("%s left the shop", visitorName);
-//        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType, message);
-//        connections.broadcast(visitorName, serverMessage);
-//    }
-//
-//    public void makeNoise(String petName, String sound) throws ResponseException {
-//        try {
-//            var message = String.format("%s says %s", petName, sound);
-//            var serverMessage = new ServerMessage(ServerMessage.Type.NOISE, message);
-//            connections.broadcast("", serverMessage);
-//        } catch (Exception ex) {
-//            throw new ResponseException(500, ex.getMessage());
-//        }
-//    }
 }

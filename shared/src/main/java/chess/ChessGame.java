@@ -121,22 +121,6 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = getKingPosition(board, teamColor);
 
-//        for (ChessPosition key : board.pieces.keySet()) {
-//            ChessPiece piece = board.pieces.get(key);
-//
-//            if (piece.getTeamColor() != teamColor) {
-//                HashSet<ChessMove> moves = piece.pieceMoves(board, key);
-//
-//                for (ChessMove move : moves) {
-//                    ChessPosition endPosition = move.getEndPosition();
-//
-//                    if (endPosition.equals(kingPosition)) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-
         for (int i=0; i<board.squares.length; i++){
             for (int j=0; j<board.squares[i].length; j++){
                 ChessPosition pos = new ChessPosition(i+1,j+1);
@@ -180,13 +164,6 @@ public class ChessGame {
     }
 
     public ChessPosition getKingPosition(ChessBoard board, TeamColor teamColor) {
-//        for (ChessPosition key : board.pieces.keySet()) {
-//            ChessPiece piece = board.pieces.get(key);
-//
-//            if (piece.getPieceType() == ChessPiece.PieceType.KING && piece.getTeamColor() == teamColor) {
-//                return key;
-//            }
-//        }
 
         for (int i=0; i<board.squares.length; i++){
             for (int j=0; j<board.squares[i].length; j++){

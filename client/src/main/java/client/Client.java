@@ -199,15 +199,6 @@ public class Client {
                 board.resetBoard();
             }
             StringBuilder games = new StringBuilder();
-//            if(playerColor.equalsIgnoreCase("white")){
-//                games.append(makeWhiteBoard(board)).append("\n");
-//                this.playerColor = "white";
-//            } else if(playerColor.equalsIgnoreCase("black")){
-//                games.append(makeBlackBoard(board)).append("\n");
-//                this.playerColor = "black";
-//            } else {
-//                games.append(makeWhiteBoard(board)).append("\n");
-//            }
             this.currGame = gameData;
             state = State.JOINED;
             this.webSocketFacade.joinGame(this.authToken, this.currUser, gameID);
@@ -230,7 +221,6 @@ public class Client {
                 board.resetBoard();
             }
             StringBuilder games = new StringBuilder();
-//            games.append(makeWhiteBoard(board));
             this.currGame = gameData;
             state = State.JOINED;
             this.webSocketFacade.observeGame(this.authToken, this.currUser, gameID);
@@ -523,11 +513,6 @@ public class Client {
                 GameData newGame = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), currGame.getBlackUsername(), currGame.getGameName(), game);
                 this.currGame = server.move(new AuthData(this.authToken, this.currUser), newGame);
                 this.webSocketFacade.makeMove(this.authToken, this.currUser, currGame.getGameID());
-//            if (playerColor == "white"){
-//                return makeWhiteBoard(board);
-//            } else {
-//                return makeBlackBoard(board);
-//            }
             } else {
                 throw new ResponseException(400, "Expected: <Start Location> <End Location>");
             }
