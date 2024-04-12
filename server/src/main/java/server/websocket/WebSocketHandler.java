@@ -47,7 +47,8 @@ public class WebSocketHandler {
             case JOIN_PLAYER -> joinPlayer(action.getUsername(), session, action.getGameID());
             case JOIN_OBSERVER -> joinObserver(action.getUsername(), session, action.getGameID());
             case MAKE_MOVE -> makeMove(action.getUsername(), session, action.getGameID());
-//            case EXIT -> exit(action.visitorName());
+            case LEAVE -> leave(action.getUsername(), session, action.getGameID());
+            case RESIGN -> resign(action.getUsername(), session, action.getGameID());
         }
     }
 
@@ -191,6 +192,19 @@ public class WebSocketHandler {
         connections.broadcastToSender(visitorName, gameServerMessage);
         connections.broadcast(visitorName, gameServerMessage);
         var message = String.format("%s just made a move.", visitorName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(visitorName, serverMessage);
+    }
+
+    private void leave(String visitorName, Session session, int gameID) throws IOException{
+        var message = String.format("%s just left the game.", visitorName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(visitorName, serverMessage);
+        connections.remove(visitorName);
+    }
+
+    private void resign(String visitorName, Session session, int gameID) throws IOException{
+        var message = String.format("%s has resigned the game.", visitorName);
         var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(visitorName, serverMessage);
     }

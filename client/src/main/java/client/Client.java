@@ -73,7 +73,7 @@ public class Client {
                     - Help
                     - Quit
                     """;
-        } else if (state == State.JOINED){
+        } else if (state == State.JOINED || state == State.RESIGNED){
             return """
                     - Move <Start Location> <End Location>
                     - Highlight (Legal Moves) <Piece>
@@ -113,6 +113,7 @@ public class Client {
                 case "redraw" -> redraw();
                 case "leave" -> leave();
                 case "move" -> move(params);
+                case "resign" -> resign();
                 default -> help();
             };
         } catch (Exception ex) {
@@ -412,109 +413,129 @@ public class Client {
     }
 
     public String highlightMoves(String ... params) throws ResponseException{
-        this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
-        if (params.length >= 1) {
-            String pieceString = params[0];
-            String[] pieceStr = pieceString.split(",");
-            int row = Integer.parseInt(pieceStr[0]);
-            int col = Integer.parseInt(pieceStr[1]);
-            ChessGame game = currGame.getGame();
-            if (game.getBoard() == null){
-                ChessBoard board = new ChessBoard();
-                board.resetBoard();
-                game.setBoard(board);
-            }
-            ChessBoard board = game.getBoard();
-            ChessPosition pos = new ChessPosition(row, col);
-            ChessPiece piece = board.getPiece(pos);
-            StringBuilder moves = new StringBuilder();
-            if (piece == null){
-                moves.append("Null piece.");
-                return moves.toString();
-            }
-            HashSet<ChessMove> validMoves = piece.pieceMoves(board, pos);
-            for (ChessMove move : validMoves){
-                ChessPosition end = move.getEndPosition();
-                int endRow = end.getRow();
-                int endCol = end.getColumn();
-                board.squares[endRow-1][endCol-1] = new ChessPiece(ChessGame.TeamColor.WHITE, null);
-            }
-            if (this.playerColor.equals("white")){
-                moves.append(makeWhiteBoard(board));
-            } else if (this.playerColor.equals("black")){
-                moves.append(makeBlackBoard(board));
-            }
-            for (int i=0; i<board.squares.length;i++){
-                for (int j=0; j<board.squares[i].length;j++){
-                    ChessPosition chessPosition = new ChessPosition(i+1,j+1);
-                    ChessPiece chessPiece = board.getPiece(chessPosition);
-                    if (chessPiece != null){
-                        if (chessPiece.teamColor == ChessGame.TeamColor.WHITE && chessPiece.pieceType == null){
-                            board.removePiece(chessPosition);
+        if (state != State.RESIGNED){
+            this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
+            if (params.length >= 1) {
+                String pieceString = params[0];
+                String[] pieceStr = pieceString.split(",");
+                int row = Integer.parseInt(pieceStr[0]);
+                int col = Integer.parseInt(pieceStr[1]);
+                ChessGame game = currGame.getGame();
+                if (game.getBoard() == null){
+                    ChessBoard board = new ChessBoard();
+                    board.resetBoard();
+                    game.setBoard(board);
+                }
+                ChessBoard board = game.getBoard();
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+                StringBuilder moves = new StringBuilder();
+                if (piece == null){
+                    moves.append("Null piece.");
+                    return moves.toString();
+                }
+                HashSet<ChessMove> validMoves = piece.pieceMoves(board, pos);
+                for (ChessMove move : validMoves){
+                    ChessPosition end = move.getEndPosition();
+                    int endRow = end.getRow();
+                    int endCol = end.getColumn();
+                    board.squares[endRow-1][endCol-1] = new ChessPiece(ChessGame.TeamColor.WHITE, null);
+                }
+                if (this.playerColor.equals("white")){
+                    moves.append(makeWhiteBoard(board));
+                } else if (this.playerColor.equals("black")){
+                    moves.append(makeBlackBoard(board));
+                }
+                for (int i=0; i<board.squares.length;i++){
+                    for (int j=0; j<board.squares[i].length;j++){
+                        ChessPosition chessPosition = new ChessPosition(i+1,j+1);
+                        ChessPiece chessPiece = board.getPiece(chessPosition);
+                        if (chessPiece != null){
+                            if (chessPiece.teamColor == ChessGame.TeamColor.WHITE && chessPiece.pieceType == null){
+                                board.removePiece(chessPosition);
+                            }
                         }
                     }
                 }
+                return moves.toString();
+            } else {
+                throw new ResponseException(400, "Expected: <Piece>");
             }
-            return moves.toString();
         } else {
-            throw new ResponseException(400, "Expected: <Piece>");
+            return "You have resigned this game.";
         }
+
     }
 
     public String redraw()throws ResponseException {
-        this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
-        ChessGame game = currGame.getGame();
-        ChessBoard board = game.getBoard();
-        StringBuilder sb = new StringBuilder();
-        if (this.playerColor == "white"){
-            sb.append(makeWhiteBoard(board));
+        if (state != State.RESIGNED){
+            this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
+            ChessGame game = currGame.getGame();
+            ChessBoard board = game.getBoard();
+            StringBuilder sb = new StringBuilder();
+            if (this.playerColor == "white"){
+                sb.append(makeWhiteBoard(board));
+            } else {
+                sb.append(makeBlackBoard(board));
+            }
+            return sb.toString();
         } else {
-            sb.append(makeBlackBoard(board));
+            return "You have resigned this game.";
         }
-        return sb.toString();
     }
 
     public String leave() throws ResponseException{
         state = State.SIGNEDIN;
         GameData game = null;
-        if (this.playerColor == "white"){
+        if (this.playerColor.equals("white")){
             game = new GameData(currGame.getGameID(), null, currGame.getBlackUsername(), currGame.getGameName(), currGame.getGame());
         } else {
             game = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), null, currGame.getGameName(), currGame.getGame());
         }
         server.leaveGame(new AuthData(this.authToken, this.currUser), game);
+        webSocketFacade.leave(this.authToken, this.currUser, gameID);
         this.currGame = null;
         return "You left the game.";
     }
+    public String resign() throws ResponseException{
+        state = State.RESIGNED;
+        webSocketFacade.resign(this.authToken, this.currUser, gameID);
+        return "You resigned.";
+    }
 
     public String move(String... params) throws ResponseException, InvalidMoveException {
-        this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
-        if (params.length >= 1) {
-            String startStr = params[0];
-            String endStr = params[1];
-            int startRow = Integer.parseInt(startStr.split(",")[0]);
-            int startCol = Integer.parseInt(startStr.split(",")[1]);
-            int endRow = Integer.parseInt(endStr.split(",")[0]);
-            int endCol = Integer.parseInt(endStr.split(",")[1]);
-            ChessPosition startPos = new ChessPosition(startRow, startCol);
-            ChessPosition endPos = new ChessPosition(endRow, endCol);
-            ChessMove move = new ChessMove(startPos, endPos, null);
-            ChessGame game = currGame.getGame();
-            ChessBoard board = game.getBoard();
-            ChessPiece piece = board.getPiece(startPos);
-            game.makeMove(move);
-            GameData newGame = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), currGame.getBlackUsername(), currGame.getGameName(), game);
-            this.currGame = server.move(new AuthData(this.authToken, this.currUser), newGame);
-            this.webSocketFacade.makeMove(this.authToken, this.currUser, currGame.getGameID());
+        if (state != State.RESIGNED){
+            this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
+            if (params.length >= 1) {
+                String startStr = params[0];
+                String endStr = params[1];
+                int startRow = Integer.parseInt(startStr.split(",")[0]);
+                int startCol = Integer.parseInt(startStr.split(",")[1]);
+                int endRow = Integer.parseInt(endStr.split(",")[0]);
+                int endCol = Integer.parseInt(endStr.split(",")[1]);
+                ChessPosition startPos = new ChessPosition(startRow, startCol);
+                ChessPosition endPos = new ChessPosition(endRow, endCol);
+                ChessMove move = new ChessMove(startPos, endPos, null);
+                ChessGame game = currGame.getGame();
+                ChessBoard board = game.getBoard();
+                ChessPiece piece = board.getPiece(startPos);
+                game.makeMove(move);
+                GameData newGame = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), currGame.getBlackUsername(), currGame.getGameName(), game);
+                this.currGame = server.move(new AuthData(this.authToken, this.currUser), newGame);
+                this.webSocketFacade.makeMove(this.authToken, this.currUser, currGame.getGameID());
 //            if (playerColor == "white"){
 //                return makeWhiteBoard(board);
 //            } else {
 //                return makeBlackBoard(board);
 //            }
+            } else {
+                throw new ResponseException(400, "Expected: <Start Location> <End Location>");
+            }
+            return "";
         } else {
-            throw new ResponseException(400, "Expected: <Start Location> <End Location>");
+            return "You have resigned this game.";
         }
-        return "";
+
     }
 
 }
