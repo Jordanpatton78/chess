@@ -6,5 +6,5 @@ public enum State {
 
     JOINED,
 
-    RESIGNED
+    COMPLETED
 }

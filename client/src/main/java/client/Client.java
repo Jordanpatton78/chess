@@ -41,17 +41,22 @@ public class Client {
         this.serverUrl = serverUrl;
         this.notificationHandler = new NotificationHandler() {
             @Override
-            public void notify(ServerMessage serverMessage) {
-                String message = serverMessage.getMessage();
-                if (determineMessageType(message) == ServerMessage.ServerMessageType.LOAD_GAME){
-                    if (playerColor.equals(determineOrientation(message))){
-                        System.out.println(message);
-                    } else{
-                        message = flipChessboard(message);
+            public void notify(ServerMessage serverMessage){
+                try{
+                    isInCheckmate();
+                    String message = serverMessage.getMessage();
+                    if (determineMessageType(message) == ServerMessage.ServerMessageType.LOAD_GAME){
+                        if (playerColor.equals(determineOrientation(message))){
+                            System.out.println(message);
+                        } else{
+                            message = flipChessboard(message);
+                            System.out.println(message);
+                        }
+                    }else {
                         System.out.println(message);
                     }
-                }else {
-                    System.out.println(message);
+                } catch (ResponseException e){
+
                 }
             }
         };
@@ -73,7 +78,7 @@ public class Client {
                     - Help
                     - Quit
                     """;
-        } else if (state == State.JOINED || state == State.RESIGNED){
+        } else if (state == State.JOINED || state == State.COMPLETED){
             return """
                     - Move <Start Location> <End Location>
                     - Highlight (Legal Moves) <Piece>
@@ -376,7 +381,7 @@ public class Client {
         return flippedStringBuilder.toString();
     }
 
-    public static String determineOrientation(String chessboard) {
+    public String determineOrientation(String chessboard) throws ResponseException{
         // Split the chessboard string into lines
         String chessboardCopy = new String(chessboard);
         String[] lines = chessboardCopy.trim().split("\n");
@@ -403,7 +408,7 @@ public class Client {
     }
 
     public String highlightMoves(String ... params) throws ResponseException{
-        if (state != State.RESIGNED){
+        if (state != State.COMPLETED){
             this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
             if (params.length >= 1) {
                 String pieceString = params[0];
@@ -452,13 +457,13 @@ public class Client {
                 throw new ResponseException(400, "Expected: <Piece>");
             }
         } else {
-            return "You have resigned this game.";
+            return "The game is over.";
         }
 
     }
 
     public String redraw()throws ResponseException {
-        if (state != State.RESIGNED){
+        if (state != State.COMPLETED){
             this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
             ChessGame game = currGame.getGame();
             ChessBoard board = game.getBoard();
@@ -470,7 +475,7 @@ public class Client {
             }
             return sb.toString();
         } else {
-            return "You have resigned this game.";
+            return "The game is over.";
         }
     }
 
@@ -488,13 +493,13 @@ public class Client {
         return "You left the game.";
     }
     public String resign() throws ResponseException{
-        state = State.RESIGNED;
+        state = State.COMPLETED;
         webSocketFacade.resign(this.authToken, this.currUser, gameID);
         return "You resigned.";
     }
 
     public String move(String... params) throws ResponseException, InvalidMoveException {
-        if (state != State.RESIGNED){
+        if (state != State.COMPLETED){
             this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
             if (params.length >= 1) {
                 String startStr = params[0];
@@ -518,9 +523,17 @@ public class Client {
             }
             return "";
         } else {
-            return "You have resigned this game.";
+            return "The game is over.";
         }
 
+    }
+
+    public void isInCheckmate() throws ResponseException{
+        ChessGame chessGame = currGame.getGame();
+        if (chessGame.isInCheckmate){
+            this.webSocketFacade.checkmate(this.authToken, this.currUser, currGame.getGameID());
+            state = State.COMPLETED;
+        }
     }
 
 }

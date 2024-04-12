@@ -49,6 +49,7 @@ public class WebSocketHandler {
             case MAKE_MOVE -> makeMove(action.getUsername(), session, action.getGameID());
             case LEAVE -> leave(action.getUsername(), session, action.getGameID());
             case RESIGN -> resign(action.getUsername(), session, action.getGameID());
+            case CHECKMATE -> checkmate(action.getUsername(), session, action.getGameID());
         }
     }
 
@@ -205,6 +206,12 @@ public class WebSocketHandler {
 
     private void resign(String visitorName, Session session, int gameID) throws IOException{
         var message = String.format("%s has resigned the game.", visitorName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(visitorName, serverMessage);
+    }
+
+    private void checkmate(String visitorName, Session session, int gameID) throws IOException{
+        var message = String.format("%s is in checkmate.", visitorName);
         var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(visitorName, serverMessage);
     }

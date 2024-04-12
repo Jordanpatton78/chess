@@ -87,4 +87,13 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
+    public void checkmate(String authToken, String username, int gameID) throws ResponseException {
+        try {
+            var action = new UserGameCommand( UserGameCommand.CommandType.CHECKMATE, authToken, username, gameID);
+            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+        } catch (IOException ex) {
+            throw new ResponseException(500, ex.getMessage());
+        }
+    }
+
 }
