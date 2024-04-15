@@ -43,7 +43,6 @@ public class Client {
             @Override
             public void notify(ServerMessage serverMessage){
                 try{
-                    isInCheckmate();
                     String message = serverMessage.getMessage();
                     if (determineMessageType(message) == ServerMessage.ServerMessageType.LOAD_GAME){
                         if (playerColor.equals(determineOrientation(message))){
@@ -78,7 +77,7 @@ public class Client {
                     - Help
                     - Quit
                     """;
-        } else if (state == State.JOINED || state == State.COMPLETED){
+        } else if (state == State.JOINED || state == State.COMPLETED || state == State.OBSERVING){
             return """
                     - Move <Start Location> <End Location>
                     - Highlight (Legal Moves) <Piece>
@@ -119,6 +118,7 @@ public class Client {
                 case "leave" -> leave();
                 case "move" -> move(params);
                 case "resign" -> resign();
+                case "yes" -> resignConfirm();
                 default -> help();
             };
         } catch (Exception ex) {
@@ -227,8 +227,9 @@ public class Client {
             }
             StringBuilder games = new StringBuilder();
             this.currGame = gameData;
-            state = State.JOINED;
+            state = State.OBSERVING;
             this.webSocketFacade.observeGame(this.authToken, this.currUser, gameID);
+            this.playerColor = "white";
             return games.toString();
         } else {
             throw new ResponseException(400, "Expected: <GameID>");
@@ -468,7 +469,7 @@ public class Client {
             ChessGame game = currGame.getGame();
             ChessBoard board = game.getBoard();
             StringBuilder sb = new StringBuilder();
-            if (this.playerColor == "white"){
+            if (this.playerColor.equals("white")){
                 sb.append(makeWhiteBoard(board));
             } else {
                 sb.append(makeBlackBoard(board));
@@ -493,13 +494,23 @@ public class Client {
         return "You left the game.";
     }
     public String resign() throws ResponseException{
-        state = State.COMPLETED;
-        webSocketFacade.resign(this.authToken, this.currUser, gameID);
-        return "You resigned.";
+        if (state != State.OBSERVING){
+            return "Are you sure you would like to resign? Yes/ no";
+        }
+        return "You can't resign as an observer.";
+    }
+
+    public String resignConfirm() throws ResponseException{
+        if (state != State.OBSERVING){
+            state = State.COMPLETED;
+            webSocketFacade.resign(this.authToken, this.currUser, gameID);
+            return "You resigned.";
+        }
+        return "You can't resign as an observer.";
     }
 
     public String move(String... params) throws ResponseException, InvalidMoveException {
-        if (state != State.COMPLETED){
+        if (state != State.COMPLETED && state != State.OBSERVING){
             this.currGame = server.getGame(new AuthData(this.authToken, this.currUser), this.currGame);
             if (params.length >= 1) {
                 String startStr = params[0];
@@ -518,20 +529,47 @@ public class Client {
                 GameData newGame = new GameData(currGame.getGameID(), currGame.getWhiteUsername(), currGame.getBlackUsername(), currGame.getGameName(), game);
                 this.currGame = server.move(new AuthData(this.authToken, this.currUser), newGame);
                 this.webSocketFacade.makeMove(this.authToken, this.currUser, currGame.getGameID());
+                isInCheckmate();
+                isInCheck();
             } else {
                 throw new ResponseException(400, "Expected: <Start Location> <End Location>");
             }
             return "";
         } else {
-            return "The game is over.";
+            if (state == State.COMPLETED){
+                return "The game is over.";
+            } else {
+                return "You can't make moves as an observer.";
+            }
         }
 
     }
 
+
+    public void isInCheck() throws ResponseException{
+        if (state != State.COMPLETED){
+            ChessGame chessGame = currGame.getGame();
+            if (chessGame.isInCheck(chessGame.getTeamTurn())){
+                String loser = null;
+                if (playerColor.equals("white")){
+                    loser = currGame.getBlackUsername();
+                } else {
+                    loser = currGame.getWhiteUsername();
+                }
+                this.webSocketFacade.check(this.authToken, loser, currGame.getGameID());
+            }
+        }
+    }
     public void isInCheckmate() throws ResponseException{
         ChessGame chessGame = currGame.getGame();
-        if (chessGame.isInCheckmate){
-            this.webSocketFacade.checkmate(this.authToken, this.currUser, currGame.getGameID());
+        if (chessGame.isInCheckmate(chessGame.getTeamTurn())){
+            String loser = null;
+            if (playerColor.equals("white")){
+                loser = currGame.getBlackUsername();
+            } else {
+                loser = currGame.getWhiteUsername();
+            }
+            this.webSocketFacade.checkmate(this.authToken, loser, currGame.getGameID());
             state = State.COMPLETED;
         }
     }

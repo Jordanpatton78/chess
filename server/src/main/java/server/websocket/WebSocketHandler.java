@@ -49,6 +49,7 @@ public class WebSocketHandler {
             case MAKE_MOVE -> makeMove(action.getUsername(), session, action.getGameID());
             case LEAVE -> leave(action.getUsername(), session, action.getGameID());
             case RESIGN -> resign(action.getUsername(), session, action.getGameID());
+            case CHECK -> check(action.getUsername(), session, action.getGameID());
             case CHECKMATE -> checkmate(action.getUsername(), session, action.getGameID());
         }
     }
@@ -107,7 +108,6 @@ public class WebSocketHandler {
     private void joinObserver(String visitorName, Session session, int gameID) throws IOException, DataAccessException {
         connections.add(visitorName, session);
         GameData gameToReturn = null;
-        String playerColor = "white";
         String query = "SELECT * FROM game WHERE gameID = ?";
         try (Connection connection = DatabaseManager.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -205,15 +205,22 @@ public class WebSocketHandler {
     }
 
     private void resign(String visitorName, Session session, int gameID) throws IOException{
-        var message = String.format("%s has resigned the game.", visitorName);
+        var message = String.format("%s just resigned from the game.", visitorName);
         var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(visitorName, serverMessage);
     }
 
-    private void checkmate(String visitorName, Session session, int gameID) throws IOException{
-        var message = String.format("%s is in checkmate.", visitorName);
+    private void check(String visitorName, Session session, int gameID) throws IOException{
+        var message = String.format("%s is in check.", visitorName);
         var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(visitorName, serverMessage);
+        connections.broadcastToSender(visitorName, serverMessage);
+    }
+    private void checkmate(String visitorName, Session session, int gameID) throws IOException{
+        var message = String.format("%s is in checkmate. The game is over.", visitorName);
+        var serverMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(visitorName, serverMessage);
+        connections.broadcastToSender(visitorName, serverMessage);
     }
 
     public String makeWhiteBoard(ChessBoard board){

@@ -11,8 +11,6 @@ public class ChessGame {
     private TeamColor teamTurn = TeamColor.WHITE;
     private ChessBoard board;
 
-    public boolean isInCheckmate = false;
-
     public ChessGame() {
     }
 
@@ -152,7 +150,6 @@ public class ChessGame {
         HashSet<ChessMove> kingMoves = king.pieceMoves(board, kingPosition);
         HashSet<ChessMove> newKingMoves = simulateMoves(kingMoves, teamColor);
 
-        this.isInCheckmate = true;
         return isInCheck(teamColor) && newKingMoves.isEmpty();
     }
 
